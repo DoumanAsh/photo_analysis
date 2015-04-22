@@ -78,12 +78,18 @@ class WinPhotoAn(Toplevel):
                     self.destroy()
 
         Toplevel.__init__(self, master)
-        self.geometry("{0}x{1}+100+100".format(img_long_edge + 200, img_long_edge ))
+        self.geometry("{0}x{1}+200+200".format(settings['photo_an']['preview_size'] + 200,
+                                               settings['photo_an']['preview_size']))
+        self.config(background=main_bg,
+                    padx=top_level_padding,
+                    pady=top_level_padding)
+        self.resizable(FALSE, FALSE)
         self.focus_force()
+
         self.current_photo_ix = 0
         self.canvas_with_img = CanvasWithImage(master=self,
                                                image=self.photo_for_analysis[self.current_photo_ix],
-                                               side=img_long_edge)
+                                               side=settings['photo_an']['preview_size'])
         self.canvas_with_img.bind('<Button-1>', self.next_photo)
         self.canvas_with_img.pack(fill='both', side='left')
         self.config(background=main_bg)

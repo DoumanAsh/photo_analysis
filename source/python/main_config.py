@@ -4,20 +4,11 @@ import json
 
 supported_ext_for_analysis = ['.jpg']
 
-with open('json/name_dictionary.json', encoding='utf-8') as f:
-    name_dictionary = json.load(f)
-
-
-def get_name(name):
-    try:
-        return name_dictionary[name][language]
-    except KeyError as e:
-        print(e)
-        return name
-
 # Interface
 language = 'ru'
-img_long_edge = 500
+top_level_padding = 5
+min_preview_size = 150
+max_preview_size = 750
 main_bg = '#999999'
 main_fg = '#000000'
 canvas_bg = '#222222'
@@ -34,5 +25,18 @@ osm_geocoder = 'http://nominatim.openstreetmap.org/search/'
 # Paths to JSON configs
 cascades_json = 'json/cascades.json'
 osm_types_and_classes_json = 'json/osm_types_and_classes.json'
+settings_json = 'json/settings.json'
 
-#traces = main_config['traces']
+with open('json/name_dictionary.json', encoding='utf-8') as f:
+    name_dictionary = json.load(f)
+
+with open(settings_json, encoding='utf-8') as f:
+    settings = json.load(f)
+
+
+def get_name(name):
+    try:
+        return name_dictionary[name][language]
+    except KeyError as e:
+        print(e)
+        return name

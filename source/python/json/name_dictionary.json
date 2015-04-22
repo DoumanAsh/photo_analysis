@@ -12,7 +12,15 @@
   "menu_help":           {"en": "Help",                       "ru": "Помощь"},
   "cmd_help":            {"en": "Help",                       "ru": "Справка"},
   "cmd_about":           {"en": "About",                      "ru": "О программе"},
-  "win_settings":        {"en": "Settings",                   "ru": "Настройки"},
+
+  "win_settings":         {"en": "Settings",           "ru": "Настройки"},
+  "frame_photo_an":       {"en": "Photo analyzer",     "ru": "Фотоанализотор"},
+  "lbl_preview_size":     {"en": "Preview size: ",     "ru": "Размер предпросмотра: "},
+  "frame_analysis_type":  {"en": "Type of analysis",   "ru": "Тип анализа"},
+  "ch_btn_geo_an":        {"en": "Geo-analysis (GPS)", "ru": "Гео-анализ (GPS)"},
+  "ch_btn_obj_detect_an": {"en": "Object detection",   "ru": "Определение объектов"},
+  "": {"en": "", "ru": ""},
+
   "win_epp":             {"en": "Edit project properties",    "ru": "Редактировать свойства проекта"},
   "lbl_proj_name":       {"en": "Project name: ",             "ru": "Имя проекта: "},
   "frame_timeslot":      {"en": "Project timeslot",           "ru": "Сроки проекта"},
@@ -24,6 +32,7 @@
   "frame_description":   {"en": "Project description",        "ru": "Описание проекта"},
   "btn_save":            {"en": "Save",                       "ru": "Сохранить"},
   "btn_cancel":          {"en": "Cancel",                     "ru": "Отмена"},
+
   "win_photo_an":        {"en": "Photo analysis",             "ru": "Анализ фотографии"},
   "ask_dir_photo_an":    {"en": "Choose a folder where you want to analyse photographs from",
                           "ru": "Выберите папку, фотографии из которой необходимо проанализировать"}

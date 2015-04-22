@@ -10,7 +10,7 @@ from win_epp import WinEpp
 from win_settings import WinSettings
 
 
-class App():
+class WinMain():
     def __init__(self, master=None):
         self.master = master
         self.win_epp = None
@@ -27,7 +27,7 @@ class App():
         self.menu_file.add_command(label=get_name("cmd_settings"),
                                    command=self.cmd_settings)
         self.menu_file.add_separator()
-        self.menu_file.add_command(label=get_name("cmd_exit"), command=root.quit)
+        self.menu_file.add_command(label=get_name("cmd_exit"), command=self.master.quit)
         self.menubar.add_cascade(label=get_name("menu_main"),
                                  menu=self.menu_file)
 
@@ -120,15 +120,3 @@ class App():
     @staticmethod
     def cmd_about():
         messagebox.showinfo(get_name("win_about"), get_name("text_about"))
-
-
-root = Tk()
-root.geometry("300x300")
-s = ttk.Style()
-s.theme_use('clam')
-s.configure(style=".", background=main_bg, foreground=main_fg)
-root.config(background=main_bg)
-root.title(get_name("win_main"))
-app = App(root)
-
-root.mainloop()
