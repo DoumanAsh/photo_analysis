@@ -1,0 +1,21 @@
+{
+  "bin": {
+    "exiftool": "D:/Soft/_PhotoSoft/exiftool.exe",
+    "object_detector": "D:/Studies/_Graduation_thesis/Programming/C++/object_detection/Debug/object_detection.exe"
+  },
+  "url": {
+    "yandex_geocoder": "http://geocode-maps.yandex.ru/1.x/",
+    "osm_geocoder": "http://nominatim.openstreetmap.org/search/"
+  },
+  "json": {
+    "people_detection_cascades": "json/people_detection_cascades.json",
+    "osm_types_and_classes": "json/osm_types_and_classes.json"
+  },
+  "traces": {
+    "info":    1,
+    "error":   1,
+    "warning": 1,
+    "debug":   0,
+    "enter":   0
+  }
+}
