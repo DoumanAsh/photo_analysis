@@ -2,7 +2,7 @@
   "photo_an":
   {
     "preview_size": 500,
-    "geo_an": "true",
-    "obj_detect_an": "true"
+    "geo_an": "True",
+    "obj_detect_an": "True"
   }
 }

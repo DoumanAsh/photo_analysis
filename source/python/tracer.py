@@ -2,7 +2,12 @@ import traceback
 import os
 
 # Initial values for trace filtering
-from main_config import traces
+traces = dict(
+    error=True,
+    warning=True,
+    info=True,
+    debug=False,
+    enter=False)
 
 
 def set_tracing(trace_name, value):

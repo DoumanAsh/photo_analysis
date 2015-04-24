@@ -19,7 +19,6 @@
   "frame_analysis_type":  {"en": "Type of analysis",   "ru": "Тип анализа"},
   "ch_btn_geo_an":        {"en": "Geo-analysis (GPS)", "ru": "Гео-анализ (GPS)"},
   "ch_btn_obj_detect_an": {"en": "Object detection",   "ru": "Определение объектов"},
-  "": {"en": "", "ru": ""},
 
   "win_epp":             {"en": "Edit project properties",    "ru": "Редактировать свойства проекта"},
   "lbl_proj_name":       {"en": "Project name: ",             "ru": "Имя проекта: "},
@@ -33,7 +32,17 @@
   "btn_save":            {"en": "Save",                       "ru": "Сохранить"},
   "btn_cancel":          {"en": "Cancel",                     "ru": "Отмена"},
 
-  "win_photo_an":        {"en": "Photo analysis",             "ru": "Анализ фотографии"},
-  "ask_dir_photo_an":    {"en": "Choose a folder where you want to analyse photographs from",
-                          "ru": "Выберите папку, фотографии из которой необходимо проанализировать"}
+  "win_photo_an":          {"en": "Photo analysis",             "ru": "Анализ фотографии"},
+  "btn_analyze":           {"en": "Analyze",                    "ru": "Анализировать"},
+  "address_info":          {"en": "Address information",        "ru": "Адресная информация"},
+  "keywords":              {"en": "Keywords",                   "ru": "Ключевые слова"},
+  "ask_dir_photo_an":      {"en": "Choose a folder where you want to analyse photographs from",
+                            "ru": "Выберите папку, фотографии из которой необходимо проанализировать"},
+  "msg_run_geo_an":        {"en": "Geo-analysis is ongoing",
+                            "ru": "Выполняется гео-анализ"},
+  "msg_run_obj_detect_an": {"en": "Object detection is ongoing",
+                            "ru": "Выполняется определение объектов"},
+  "please_wait":           {"en": "Please wait...",
+                            "ru": "Пожалуйста, подождите..."},
+  "": {"en": "", "ru": ""}
 }

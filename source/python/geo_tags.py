@@ -3,7 +3,7 @@ import tracer as trace
 
 
 @trace.enter
-def convert_address_to_exiftool_format(address):
+def convert_address_to_iptc_format(address):
     d = dict(
         # Yandex kinds
         country="Country-PrimaryLocationName",
@@ -73,10 +73,10 @@ def get_info_osm(latitude, longitude):
 
 
 @trace.enter
-def get_geo_tags_in_et_format(image_name):
+def get_geo_tags_in_iptc_format(image):
     import sys
     import exif_jpeg as exif
-    exif_gps = exif.get_exif_field(image_name, "GPSInfo")
+    exif_gps = exif.get_exif_field(image, "GPSInfo")
     try:
         gps_info = exif.parse_gps_info(exif_gps, "dd") if exif_gps else None
     except KeyError:
@@ -86,21 +86,21 @@ def get_geo_tags_in_et_format(image_name):
     latitude = float(gps_info["latitude"][0])
     longitude = float(gps_info["longitude"][0])
     y_d = get_info_yandex(latitude, longitude)
-    et_d = dict(keywords=[])
+    iptc_d = dict(keywords=[])
     for tag in y_d:
-        et_key = convert_address_to_exiftool_format(tag)
-        if et_key:
-            et_d[et_key] = y_d[tag]
+        iptc_key = convert_address_to_iptc_format(tag)
+        if iptc_key:
+            iptc_d[iptc_key] = y_d[tag]
         else:
-            et_d["keywords"].append(y_d[tag])
-    et_d["keywords"].extend(get_info_osm(latitude, longitude))
-    return et_d
+            iptc_d["keywords"].append(y_d[tag])
+    iptc_d["keywords"].extend(get_info_osm(latitude, longitude))
+    return iptc_d
 
 
 def get_osm_keywords(object_class, object_type):
     import json
-    from main_config import osm_types_and_classes
-    with open(osm_types_and_classes, encoding='utf-8') as f:
+    from main_config import osm_types_and_classes_json
+    with open(osm_types_and_classes_json, encoding='utf-8') as f:
         kw_dict = json.load(f)
     keywords = []
     try:

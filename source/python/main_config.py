@@ -11,6 +11,8 @@ min_preview_size = 150
 max_preview_size = 750
 main_bg = '#999999'
 main_fg = '#000000'
+btn_bg = '#DDDDDD'
+btn_fg = '#000000'
 canvas_bg = '#222222'
 
 # External binary tools

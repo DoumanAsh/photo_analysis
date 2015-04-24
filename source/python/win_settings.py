@@ -39,16 +39,16 @@ class WinSettings(Toplevel):
         self.ch_btn_geo_an = ttk.Checkbutton(master=self.frame_analysis_type,
                                              text=get_name("ch_btn_geo_an"),
                                              variable=self.ch_btn_geo_an_value,
-                                             onvalue='true',
-                                             offvalue='false')
+                                             onvalue='True',
+                                             offvalue='False')
 
         self.ch_btn_obj_detect_an_value = StringVar()
         self.ch_btn_obj_detect_an_value.set(settings['photo_an']['obj_detect_an'])
         self.ch_btn_obj_detect_an = ttk.Checkbutton(master=self.frame_analysis_type,
                                                     text=get_name("ch_btn_obj_detect_an"),
                                                     variable=self.ch_btn_obj_detect_an_value,
-                                                    onvalue='true',
-                                                    offvalue='false')
+                                                    onvalue='True',
+                                                    offvalue='False')
 
         # ==============================================================================================================
         self.frame_buttons = ttk.Frame(master=self)
@@ -71,7 +71,7 @@ class WinSettings(Toplevel):
         self.btn_save.pack(side=LEFT)
         self.btn_cancel.pack(side=LEFT)
 
-    def save_settings(self, ev=NONE):
+    def save_settings(self, ev=None):
         settings['photo_an']['preview_size'] = (int(self.scale_preview_size.get() / 10) * 10)
         settings['photo_an']['geo_an'] = self.ch_btn_geo_an_value.get()
         settings['photo_an']['obj_detect_an'] = self.ch_btn_obj_detect_an_value.get()
@@ -82,5 +82,5 @@ class WinSettings(Toplevel):
     def close(self, ev=None):
         self.destroy()
 
-    def scale_preview_size_change(self, ev=NONE):
+    def scale_preview_size_change(self, ev=None):
         self.lbl_preview_size_value.config(text=str(int(self.scale_preview_size.get() / 10) * 10))

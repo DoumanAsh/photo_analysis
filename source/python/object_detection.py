@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
+import subprocess
+import json
 import tracer as trace
-
+from main_config import *
 
 @trace.enter
 def get_keywords(image):
-    import subprocess
-    import json
-    from main_config import object_detector, people_detection_cascades
 
-    with open(people_detection_cascades, encoding='utf-8') as f:
+    with open(cascades_json, encoding='utf-8') as f:
         cascades = json.load(f)
 
     keywords = []

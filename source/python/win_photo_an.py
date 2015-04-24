@@ -6,6 +6,8 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 # Internal modules
 from main_config import *
+import geo_tags
+import object_detection
 
 
 class CanvasWithImage(Canvas):
@@ -78,26 +80,58 @@ class WinPhotoAn(Toplevel):
                     self.destroy()
 
         Toplevel.__init__(self, master)
-        self.geometry("{0}x{1}+200+200".format(settings['photo_an']['preview_size'] + 200,
-                                               settings['photo_an']['preview_size']))
+        self.geometry("+200+200")
         self.config(background=main_bg,
                     padx=top_level_padding,
                     pady=top_level_padding)
         self.resizable(FALSE, FALSE)
         self.focus_force()
+        self.title(get_name("win_photo_an"))
 
         self.current_photo_ix = 0
+
         self.canvas_with_img = CanvasWithImage(master=self,
                                                image=self.photo_for_analysis[self.current_photo_ix],
                                                side=settings['photo_an']['preview_size'])
         self.canvas_with_img.bind('<Button-1>', self.next_photo)
-        self.canvas_with_img.pack(fill='both', side='left')
-        self.config(background=main_bg)
-        self.title(get_name("win_photo_an"))
-        self.frame = Frame(master=self)
-        self.frame.pack(side='right', fill='both', expand=1)
-        self.label = Label(self.frame, text="test")
-        self.label.pack()
+
+        self.frame_main = ttk.Frame(master=self, padding=10)
+        self.frame_controls = ttk.Frame(master=self.frame_main)
+
+        self.frame_analysis_type = ttk.LabelFrame(master=self.frame_controls,
+                                                  text=get_name("frame_analysis_type"))
+        self.ch_btn_geo_an_value = StringVar()
+        self.ch_btn_geo_an_value.set(settings['photo_an']['geo_an'])
+        self.ch_btn_geo_an = ttk.Checkbutton(master=self.frame_analysis_type,
+                                             text=get_name("ch_btn_geo_an"),
+                                             variable=self.ch_btn_geo_an_value,
+                                             onvalue='True',
+                                             offvalue='False')
+
+        self.ch_btn_obj_detect_an_value = StringVar()
+        self.ch_btn_obj_detect_an_value.set(settings['photo_an']['obj_detect_an'])
+        self.ch_btn_obj_detect_an = ttk.Checkbutton(master=self.frame_analysis_type,
+                                                    text=get_name("ch_btn_obj_detect_an"),
+                                                    variable=self.ch_btn_obj_detect_an_value,
+                                                    onvalue='True',
+                                                    offvalue='False')
+
+        self.btn_analyze = ttk.Button(master=self.frame_controls, text=get_name("btn_analyze"))
+        self.btn_analyze.bind('<ButtonRelease-1>', self.analyze)
+        self.btn_save = ttk.Button(master=self.frame_controls, text=get_name("btn_save"))
+        self.btn_save.bind('<ButtonRelease-1>', self.save)
+
+        self.frame_results = ttk.Frame(master=self.frame_main, padding=5)
+
+        self.canvas_with_img.pack(fill=BOTH, side=LEFT)
+        self.frame_main.pack(fill=BOTH, side=LEFT)
+        self.frame_controls.pack(fill=X)
+        self.frame_analysis_type.pack()
+        self.ch_btn_geo_an.pack(side=LEFT)
+        self.ch_btn_obj_detect_an.pack(side=LEFT)
+        self.btn_analyze.pack(side=LEFT)
+        self.btn_save.pack(side=LEFT)
+        self.frame_results.pack(fill=X)
 
     def next_photo(self, ev=None):
         x, y = ev.x, ev.y
@@ -112,3 +146,112 @@ class WinPhotoAn(Toplevel):
             self.current_photo_ix = len(self.photo_for_analysis) - 1
 
         self.canvas_with_img.config(image=self.photo_for_analysis[self.current_photo_ix])
+
+        # Recreate frame with results to clean up previous data
+        self.frame_results.destroy()
+        self.frame_results = ttk.Frame(master=self.frame_main, padding=5)
+        self.frame_results.pack(fill=X)
+
+    def show_msg(self, text=''):
+        bg = '#FFF8DC'
+        msg_win = Toplevel(self, background=bg)
+        msg_win.geometry("400x200+{0}+{1}".format(int(self.winfo_screenwidth() / 2 - 200),
+                                                  int(self.winfo_screenheight() / 2 - 100)))
+        msg_win.overrideredirect(True)
+        ttk.Label(msg_win,
+                  text=text,
+                  anchor=CENTER,
+                  font=("Courier New", 14),
+                  background=bg).place(relx=0.5, rely=0.4, anchor=CENTER)
+
+        ttk.Label(msg_win,
+                  text=get_name("please_wait"),
+                  anchor=CENTER,
+                  font=("Courier New", 14),
+                  background=bg).place(relx=0.5, rely=0.6, anchor=CENTER)
+        self.update()
+        return msg_win
+
+    # Handlers for parent check buttons: on change of parent value set value of children the same
+    # ------------------------------------------------------------------------------------------------------------------
+    def ch_btn_address_handler(self):
+        for var in self.ch_btn_addr_values:
+            var.set(self.ch_btn_address_info_value.get())
+
+    def ch_btn_keywords_handler(self):
+        for var in self.ch_btn_kw_values:
+            var.set(self.ch_btn_keywords_value.get())
+    # ==================================================================================================================
+
+    def analyze(self, ev=None):
+        # Dictionary to combine results of all analysis types together
+        results = {}
+
+        if self.ch_btn_geo_an_value.get() == "True":
+            msg = self.show_msg(get_name("msg_run_geo_an"))
+
+            # Get results of geo-analysis
+            results.update(geo_tags.get_geo_tags_in_iptc_format(self.photo_for_analysis[self.current_photo_ix]))
+
+            msg.destroy()
+
+            # Display header for address info only if we have found address (have got non-empty result)
+            if results:
+                self.ch_btn_address_info_value = StringVar()
+                self.ch_btn_address_info_value.set(1)
+                self.ch_btn_address_info = ttk.Checkbutton(master=self.frame_results,
+                                                           text=get_name("address_info"),
+                                                           variable=self.ch_btn_address_info_value,
+                                                           command=self.ch_btn_address_handler)
+                self.ch_btn_address_info.pack(fill=X, anchor=W)
+                self.frame_address_info = ttk.Frame(master=self.frame_results, padding=(7, 0))
+                self.frame_address_info.pack(fill=X)
+
+        self.ch_btn_addr = []
+        self.ch_btn_addr_values = []
+        for name in sorted(results):
+            # Skip keywords here, they will be displayed later
+            if name == "keywords":
+                continue
+            self.ch_btn_addr_values.append(StringVar())
+            self.ch_btn_addr_values[-1].set(1)
+            self.ch_btn_addr.append(ttk.Checkbutton(master=self.frame_address_info,
+                                                    text=results[name],
+                                                    variable=self.ch_btn_addr_values[-1]))
+
+            self.ch_btn_addr[-1].grid(row=len(self.ch_btn_addr) - 1, column=0, sticky=W)
+        if self.ch_btn_obj_detect_an_value.get() == "True":
+            msg = self.show_msg(get_name("msg_run_obj_detect_an"))
+
+            # Get results of object detection
+            if "keywords" in results:
+                results["keywords"].extend(object_detection.get_keywords(self.photo_for_analysis[self.current_photo_ix]))
+            else:
+                results["keywords"] = object_detection.get_keywords(self.photo_for_analysis[self.current_photo_ix])
+
+            msg.destroy()
+
+        if results["keywords"]:
+            self.ch_btn_keywords_value = StringVar()
+            self.ch_btn_keywords_value.set(1)
+            self.ch_btn_keywords = ttk.Checkbutton(master=self.frame_results,
+                                                   text=get_name("keywords"),
+                                                   variable=self.ch_btn_keywords_value,
+                                                   command=self.ch_btn_keywords_handler)
+            self.ch_btn_keywords.pack(fill=X, anchor=W)
+            self.frame_keywords = ttk.Frame(master=self.frame_results, padding=(7, 0))
+            self.frame_keywords.pack(fill=X)
+
+            self.ch_btn_kw = []
+            self.ch_btn_kw_values = []
+            for kw in results["keywords"]:
+                self.ch_btn_kw_values.append(StringVar())
+                self.ch_btn_kw_values[-1].set(1)
+                self.ch_btn_kw.append(ttk.Checkbutton(master=self.frame_keywords,
+                                                      text=kw,
+                                                      variable=self.ch_btn_kw_values[-1]))
+
+                self.ch_btn_kw[-1].grid(row=len(self.ch_btn_kw) - 1, column=0, sticky=W)
+
+    def save(self, ev=None):
+        pass
