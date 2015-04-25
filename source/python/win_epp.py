@@ -3,6 +3,9 @@
 from tkinter import *
 from tkinter import filedialog, messagebox
 from tkinter import ttk
+from datetime import datetime
+import os
+import json
 # Internal modules
 from main_config import *
 
@@ -73,6 +76,15 @@ class WinEpp(Toplevel):
             self.entry_proj_name.insert(0, project_dict["name"])
             self.entry_start_date.insert(0, project_dict["timeslot"]["start"]["date"])
             self.entry_start_time.insert(0, project_dict["timeslot"]["start"]["time"])
+            self.entry_finish_date.insert(0, project_dict["timeslot"]["finish"]["date"])
+            self.entry_finish_time.insert(0, project_dict["timeslot"]["finish"]["time"])
+            self.txt_keywords.insert('1.0', '\n'.join(project_dict["keywords"]))
+            self.txt_keywords.insert('1.0', project_dict["description"])
+        else:
+            self.entry_start_date.insert(0, datetime.now().strftime("%d.%m.%Y"))
+            self.entry_start_time.insert(0, "00:00")
+            self.entry_finish_date.insert(0, datetime.now().strftime("%d.%m.%Y"))
+            self.entry_finish_time.insert(0, "23:59")
 
         # Locate elements
         self.frame_proj_name.pack(fill=X)
@@ -99,20 +111,96 @@ class WinEpp(Toplevel):
         self.btn_cancel.pack(side=LEFT)
 
     def save_project(self, ev=None):
-        proj_dict = {
-            "name": self.entry_proj_name.get(),
-            "timeslot": {
-                "start": {
-                    "date": self.entry_start_date.get(),
-                    "time": self.entry_start_time.get()
-                },
-                "finish": {
-                    "date": self.entry_finish_date.get(),
-                    "time": self.entry_finish_time.get()
-                }
-            }
-        }
-        print(proj_dict)
+        # Check projects directory
+        if not os.path.isdir(projects_dir):
+            messagebox.showerror(parent=self, title=get_name('msg_wrong_proj_dir_title'),
+                                 message=get_name('msg_wrong_proj_dir_text'))
+
+        proj_dict = dict(name=self.entry_proj_name.get(),
+                         timeslot=dict(start=dict(date=self.entry_start_date.get(),
+                                                  time=self.entry_start_time.get()),
+                                       finish=dict(date=self.entry_finish_date.get(),
+                                                   time=self.entry_finish_time.get())),
+                         keywords=self.txt_keywords.get('1.0', END).replace(',', ' ').replace(';', ' ').split(),
+                         description=self.txt_description.get('1.0', END))
+
+        # Date/time checks
+        # --------------------------------------------------------------------------------------------------------------
+        if not self.verify_date(proj_dict["timeslot"]["start"]["date"]):
+            messagebox.showerror(parent=self, title=get_name('msg_wrong_start_date_title'),
+                                 message=get_name('msg_wrong_start_date_text'))
+            return
+        if not self.verify_date(proj_dict["timeslot"]["finish"]["date"]):
+            messagebox.showerror(parent=self, title=get_name('msg_wrong_finish_date_title'),
+                                 message=get_name('msg_wrong_finish_date_text'))
+            return
+        if not self.verify_time(proj_dict["timeslot"]["start"]["time"]):
+            messagebox.showerror(parent=self, title=get_name('msg_wrong_start_time_title'),
+                                 message=get_name('msg_wrong_start_time_text'))
+            return
+        if not self.verify_time(proj_dict["timeslot"]["finish"]["time"]):
+            messagebox.showerror(parent=self, title=get_name('msg_wrong_finish_time_title'),
+                                 message=get_name('msg_wrong_finish_time_text'))
+            return
+
+        datetime_start = datetime.strptime('{0} {1}'.format(proj_dict["timeslot"]["start"]["date"],
+                                                            proj_dict["timeslot"]["start"]["time"]),
+                                           '%d.%m.%Y %H:%M')
+        datetime_finish = datetime.strptime('{0} {1}'.format(proj_dict["timeslot"]["finish"]["date"],
+                                                             proj_dict["timeslot"]["finish"]["time"]),
+                                            '%d.%m.%Y %H:%M')
+        if datetime_finish < datetime_start:
+            messagebox.showerror(parent=self, title=get_name('msg_wrong_start_finish_datetime_title'),
+                                 message=get_name('msg_wrong_start_finish_datetime_text'))
+            return
+        # ==============================================================================================================
+
+        splitted_start_date = proj_dict["timeslot"]["start"]["date"].split('.')
+        path = '{0}-{1}-{2}'.format(splitted_start_date[2], splitted_start_date[1], splitted_start_date[0])
+        if proj_dict["timeslot"]["start"]["date"] != proj_dict["timeslot"]["finish"]["date"]:
+            splitted_finish_date = proj_dict["timeslot"]["finish"]["date"].split('.')
+            path = '{0}-{1}-{2}-{3}'.format(path, splitted_finish_date[2], splitted_finish_date[1], splitted_finish_date[0])
+        path = '{0}_{1}'.format(path, proj_dict["name"].replace(' ', '_'))
+
+        path = os.path.normpath(os.path.join(projects_dir, path))
+
+        # Create a new folder for project if not exist
+        if os.path.isdir(path):
+            rc = messagebox.askyesnocancel(parent=self,
+                                           title=get_name('msg_proj_overwrite_title'),
+                                           message=get_name('msg_proj_overwrite_text'))
+            if rc is False:
+                self.close()
+                return
+            if rc is None:
+                return
+        else:
+            os.mkdir(path)
+
+        with open(os.path.join(path, project_file), "w", encoding='utf-8') as f:
+            json.dump(proj_dict, f)
+
+        messagebox.showinfo(parent=self, title=get_name('msg_proj_saved_title'),
+                            message='{0}\n{1}'.format(get_name('msg_proj_saved_text'), path))
+        self.close()
 
     def close(self, ev=None):
         self.destroy()
+
+    @staticmethod
+    def verify_date(date):
+        try:
+            datetime.strptime(date, '%d.%m.%Y')
+            return True
+        except ValueError as e:
+            print(e)
+            return False
+
+    @staticmethod
+    def verify_time(time):
+        try:
+            datetime.strptime(time, '%H:%M')
+            return True
+        except ValueError as e:
+            print(e)
+            return False

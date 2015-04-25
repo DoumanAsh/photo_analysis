@@ -29,11 +29,14 @@ cascades_json = 'json/cascades.json'
 osm_types_and_classes_json = 'json/osm_types_and_classes.json'
 settings_json = 'json/settings.json'
 
-with open('json/name_dictionary.json', encoding='utf-8') as f:
-    name_dictionary = json.load(f)
+with open('json/name_dictionary.json', encoding='utf-8') as _f:
+    name_dictionary = json.load(_f)
 
-with open(settings_json, encoding='utf-8') as f:
-    settings = json.load(f)
+with open(settings_json, encoding='utf-8') as _f:
+    settings = json.load(_f)
+
+projects_dir = 'D:/Photo_projects'
+project_file = 'photo_project.json'
 
 
 def get_name(name):
