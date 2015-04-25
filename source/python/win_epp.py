@@ -20,7 +20,7 @@ class WinEpp(Toplevel):
         self.config(background=main_bg,
                     padx=top_level_padding,
                     pady=top_level_padding)
-        self.resizable(FALSE, FALSE)
+        self.resizable(False, False)
 
         self.frame_proj_name = ttk.Frame(master=self)
         self.lbl_proj_name = ttk.Label(master=self.frame_proj_name,

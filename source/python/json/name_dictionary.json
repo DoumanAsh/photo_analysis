@@ -5,7 +5,7 @@
   "cmd_exit":            {"en": "Exit",                       "ru": "Выход"},
   "menu_project":        {"en": "Projects",                   "ru": "Проекты"},
   "cmd_create_project":  {"en": "Create project",             "ru": "Создать проект"},
-  "cmd_view_projects":   {"en": "View projects",              "ru": "Обзор проектов"},
+  "cmd_view_proj":       {"en": "View projects",              "ru": "Обзор проектов"},
   "menu_common_op":      {"en": "Common operations",          "ru": "Общие команды"},
   "cmd_save_photo":      {"en": "Save photographs",           "ru": "Сохранить фотографии"},
   "cmd_analyse_photo":   {"en": "Analyse photographs",        "ru": "Выполнить анализ фотографий"},

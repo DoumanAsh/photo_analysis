@@ -8,6 +8,7 @@ from main_config import *
 from win_photo_an import WinPhotoAn
 from win_epp import WinEpp
 from win_settings import WinSettings
+from win_view_proj import WinViewProj
 
 
 class WinMain():
@@ -16,7 +17,7 @@ class WinMain():
         self.win_epp = None
         self.win_settings = None
         self.win_photo_an = None
-        self.win_view_projects = None
+        self.win_view_proj = None
 
         # Menu
         self.menubar = Menu(master)
@@ -35,8 +36,8 @@ class WinMain():
         self.menu_project = Menu(self.menubar, tearoff=0)
         self.menu_project.add_command(label=get_name("cmd_create_project"),
                                       command=self.cmd_create_project)
-        self.menu_project.add_command(label=get_name("cmd_view_projects"),
-                                      command=self.cmd_view_projects)
+        self.menu_project.add_command(label=get_name("cmd_view_proj"),
+                                      command=self.cmd_view_proj)
         self.menubar.add_cascade(label=get_name("menu_project"),
                                  menu=self.menu_project)
 
@@ -58,6 +59,8 @@ class WinMain():
                                    command=self.cmd_about)
         self.menubar.add_cascade(label=get_name("menu_help"),
                                  menu=self.menu_help)
+        self.label = ttk.Label()
+        self.label.pack()
 
     def cmd_settings(self, ev=None):
         # Create window from class and save pointer
@@ -88,8 +91,22 @@ class WinMain():
         # Unset pointer
         self.win_epp = None
 
-    def cmd_view_projects(self):
-        pass
+    def cmd_view_proj(self):
+        if self.win_view_proj:
+            self.win_view_proj.focus_force()
+            return
+        # Create window from class and save pointer
+        self.win_view_proj = WinViewProj(master=self.master)
+        # Bind handler on destroying to clean up self class
+        self.win_view_proj.bind("<Destroy>", self.handle_destroy_win_view_proj)
+
+    def handle_destroy_win_view_proj(self, ev=None):
+        # Unbind to avoid multiple calls
+        self.win_view_proj.unbind("<Destroy>")
+        self.label.config(text=self.win_view_proj.selected_proj)
+        # Unset pointer
+        self.win_view_proj = None
+
 
     def cmd_save_photo(self):
         pass
@@ -120,3 +137,4 @@ class WinMain():
     @staticmethod
     def cmd_about():
         messagebox.showinfo(get_name("win_about"), get_name("text_about"))
+

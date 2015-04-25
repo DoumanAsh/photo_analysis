@@ -21,5 +21,4 @@ style.configure(style="TButton", background=btn_bg, foreground=btn_fg)
 root.config(background=main_bg)
 root.title(get_name("win_main"))
 main_window = WinMain(root)
-
 root.mainloop()
