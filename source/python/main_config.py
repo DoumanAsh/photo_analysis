@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import os
-import json
+from os import path
+from json import load as json_load
 
 supported_ext_for_analysis = ['.jpg']
 
@@ -16,9 +16,9 @@ btn_fg = '#000000'
 canvas_bg = '#222222'
 
 # External binary tools
-exiftool = os.path.abspath('bin/exiftool.exe')
+exiftool = path.abspath('bin/exiftool.exe')
 # FIXME: change path, when you are ready
-object_detector = os.path.abspath('D:/Studies/_Graduation_thesis/Programming/C++/object_detection/Debug/object_detection.exe')
+object_detector = path.abspath('D:/Studies/_Graduation_thesis/Programming/C++/object_detection/Debug/object_detection.exe')
 
 # Geocoders
 yandex_geocoder = 'http://geocode-maps.yandex.ru/1.x/'
@@ -30,10 +30,10 @@ osm_types_and_classes_json = 'json/osm_types_and_classes.json'
 settings_json = 'json/settings.json'
 
 with open('json/name_dictionary.json', encoding='utf-8') as _f:
-    name_dictionary = json.load(_f)
+    name_dictionary = json_load(_f)
 
 with open(settings_json, encoding='utf-8') as _f:
-    settings = json.load(_f)
+    settings = json_load(_f)
 
 projects_dir = 'D:/Photo_projects'
 project_file = 'photo_project.json'

@@ -1,7 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 import tracer as trace
 
-
 def get_all_exif(img_name):
     from PIL import Image
     from PIL.ExifTags import TAGS
@@ -54,10 +53,8 @@ def parse_gps_info(gps_info, coord_format="dd", signed=True):
         return coordinates
 
     # Parse altitude
-    if 6 in gps_info.keys():
-        sign = ''
-        if gps_info[5] == 1:
-            sign = '-'
+    if 6 in gps_info:
+        sign = '-' if gps_info[5] == 1 else ''
         coordinates["altitude"] = sign + str(gps_info[6][0]/gps_info[6][1])
 
     # Parse latitude
@@ -104,15 +101,11 @@ def parse_gps_info(gps_info, coord_format="dd", signed=True):
     if signed:
         negative_sign = ["S", "W"]
 
-        sign = "+"
-        if lat_symbol in negative_sign:
-            sign = "-"
+        sign = '+' if not lat_symbol in negative_sign else '-'
 
         coordinates["latitude"][0] = "".join((sign, coordinates["latitude"][0]))
 
-        sign = "+"
-        if lon_symbol in negative_sign:
-            sign = "-"
+        sign = '+' if not lon_symbol in negative_sign else '-'
         coordinates["longitude"][0] = "".join((sign, coordinates["longitude"][0]))
     else:
         coordinates["latitude"].extend(lat_symbol)

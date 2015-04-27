@@ -5,7 +5,7 @@ from tkinter import filedialog, messagebox
 from tkinter import ttk
 from datetime import datetime
 import os
-import json
+from json import load as json_load
 # Internal modules
 from main_config import *
 #from main import main_window
@@ -41,7 +41,7 @@ class WinViewProj(Toplevel):
             self.tree.insert('', 'end', i + 1, text=os.path.split(os.path.split(self.projects[i])[0])[1])
 
             with open(self.projects[i], encoding='utf-8') as f:
-                pd = json.load(f)
+                pd = json_load(f)
 
             self.tree.set(i + 1, 'name', pd['name'])
             self.tree.set(i + 1, 'start', ' '.join((pd['timeslot']['start']['date'], pd['timeslot']['start']['time'])))
