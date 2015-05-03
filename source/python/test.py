@@ -1,6 +1,7 @@
 from tkinter import ttk
 from tkinter import *
 import json
+
 root = Tk()
 with open('json/osm_types_and_classes.json', encoding='utf-8') as f:
     osm_types_and_classes = json.load(f)

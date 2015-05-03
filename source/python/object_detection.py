@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import subprocess
-import json
+from json import load as json_load
+from subprocess import Popen, PIPE
 import tracer as trace
 from main_config import *
 
@@ -8,7 +8,7 @@ from main_config import *
 def get_keywords(image):
 
     with open(cascades_json, encoding='utf-8') as f:
-        cascades = json.load(f)
+        cascades = json_load(f)
 
     keywords = []
     for cascade in sorted(cascades):
@@ -40,8 +40,8 @@ def get_keywords(image):
                         str(cascades[cascade]['nested_object']['max_x']),
                         str(cascades[cascade]['nested_object']['max_y'])])
 
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-        out, error = p.communicate()
+        proc = Popen(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+        out, _ = proc.communicate()
 
         trace.debug('Output: {0}'.format(out))
 

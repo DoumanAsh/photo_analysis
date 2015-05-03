@@ -47,7 +47,10 @@ class CanvasWithImage(Canvas):
     def config(self, image=None, side=None):
         if image:
             del self.tk_img
-            self.load_image(image=image, long_edge=side if side else self.width)
+            if side is None:
+                side = self.width
+
+            self.load_image(image=image, long_edge=side)
             self.delete(self.canvas_img_id)
 
             self.canvas_img_id = self.create_image(self.width / 2,
@@ -220,6 +223,7 @@ class WinPhotoAn(Toplevel):
                                                     variable=self.ch_btn_addr_values[-1]))
 
             self.ch_btn_addr[-1].grid(row=len(self.ch_btn_addr) - 1, column=0, sticky=W)
+
         if self.ch_btn_obj_detect_an_value.get() == "True":
             msg = self.show_msg(get_name("msg_run_obj_detect_an"))
 
@@ -244,6 +248,7 @@ class WinPhotoAn(Toplevel):
 
             self.ch_btn_kw = []
             self.ch_btn_kw_values = []
+
             for kw in results["keywords"]:
                 self.ch_btn_kw_values.append(StringVar())
                 self.ch_btn_kw_values[-1].set(1)
