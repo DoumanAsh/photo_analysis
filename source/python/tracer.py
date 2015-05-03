@@ -18,27 +18,24 @@ def info(text):
     if not traces['info']:
         return
     stack = extract_stack()
-    full_file_name, line, func_name, unused = stack[-2]
-    path, file = path.split(full_file_name)
-    print("Info: {0} [{1}:{2}]".format(text, file, line))
+    full_file_name_name, line, func_name, _ = stack[-2]
+    print("Info: {0} [{1}:{2}]".format(text, path.basename(full_file_name_name), line))
 
 
 def error(text):
     if not traces['error']:
         return
     stack = extract_stack()
-    full_file_name, line, func_name, unused = stack[-2]
-    path, file = path.split(full_file_name)
-    print("Error: {0} [{1}:{2}]".format(text, file, line))
+    full_file_name_name, line, func_name, _ = stack[-2]
+    print("Error: {0} [{1}:{2}]".format(text, path.basename(full_file_name_name), line))
 
 
 def debug(text):
     if not traces['debug']:
         return
     stack = extract_stack()
-    full_file_name, line, func_name, unused = stack[-2]
-    path, file = path.split(full_file_name)
-    print("Debug: {0} [{1}:{2}]".format(text, file, line))
+    full_file_name_name, line, func_name, _ = stack[-2]
+    print("Debug: {0} [{1}:{2}]".format(text, path.basename(full_file_name_name), line))
 
 
 def enter(fn):
@@ -46,9 +43,8 @@ def enter(fn):
         if not traces['enter']:
             return fn(*args)
         stack = extract_stack()
-        full_file_name, line, func_name, unused = stack[-2]
-        path, file = path.split(full_file_name)
-        print("Enter: {0}{1} [{2}:{3}]".format(fn.__name__, args, file, line))
+        full_file_name_name, line, func_name, _ = stack[-2]
+        print("Enter: {0}{1} [{2}:{3}]".format(fn.__name__, args, path.basename(full_file_name_name), line))
         return fn(*args)
     return wrapper
 
@@ -57,6 +53,5 @@ def warning(text):
     if not traces['warning']:
         return
     stack = extract_stack()
-    full_file_name, line, func_name, unused = stack[-2]
-    path, file = path.split(full_file_name)
-    print("Enter: to function={0} [{1}:{2}]".format(func_name, file, line))
+    full_file_name_name, line, func_name, _ = stack[-2]
+    print("Enter: to function={0} [{1}:{2}]".format(func_name, path.basename(full_file_name_name), line))

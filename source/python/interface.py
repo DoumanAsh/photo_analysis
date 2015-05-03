@@ -33,9 +33,11 @@ def SaveFile(ev):
     t.title('win2')
     if fn == '':
         return
-    if not fn.endswith(".txt"):
-        fn+=".txt"
-    open(fn, 'wt').write(textbox.get('1.0', 'end'))
+    elif not fn.endswith(".txt"):
+        fn = ".".join(fn, "txt")
+
+    with open(fn, 'wt') as fn_fd:
+        fn_fd.write(textbox.get('1.0', 'end'))
 
 if __name__ == "__main__":
     root = Tk()

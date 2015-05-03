@@ -17,7 +17,7 @@ def get_keywords(image):
 
         trace.debug('Check with cascade {0}'.format(cascade))
 
-        is_nested_object = 'nested_object' in cascades[cascade].keys()
+        is_nested_object = 'nested_object' in cascades[cascade]
 
         cmd = [object_detector, image,
                str(cascades[cascade]['cascade_file']),
