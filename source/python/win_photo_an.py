@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # External modules
+import os
 from tkinter import *
 from tkinter import filedialog, messagebox
 from tkinter import ttk
@@ -62,26 +63,6 @@ class WinPhotoAn(Toplevel):
     def __init__(self, master=None, path=None):
         self.photo_for_analysis = []
 
-        # Collect all photos (with allowed extensions) with paths
-        for top, _, files in os.walk(path):
-            for _f in files:
-                if os.path.splitext(_f)[1].lower() in supported_ext_for_analysis:
-                    self.photo_for_analysis.append(os.path.join(top, _f))
-
-        if not self.photo_for_analysis:  # If no photos found
-            while True:
-                # Ask to choose another folder
-                if messagebox.askokcancel(get_name('title_dia_1_photo_an'), get_name('text_dia_1_photo_an')):  # Ok
-                    new_path = filedialog.askdirectory(title=get_name("ask_dir_photo_an"))
-                    for top, dirs, files in os.walk(new_path):
-                        for _f in files:
-                            if os.path.splitext(_f)[1].lower() in supported_ext_for_analysis:
-                                self.photo_for_analysis.append(os.path.join(top, _f))
-                    if self.photo_for_analysis:  # Break from the loop if now photos are found
-                        break
-                else:  # Cancel
-                    self.destroy()
-
         Toplevel.__init__(self, master)
         self.geometry("+200+200")
         self.config(background=main_bg,
@@ -92,6 +73,29 @@ class WinPhotoAn(Toplevel):
         self.title(get_name("win_photo_an"))
 
         self.current_photo_ix = 0
+
+        # Collect all photos (with allowed extensions) with paths
+        for top, _, files in os.walk(path):
+            for _f in files:
+                if os.path.splitext(_f)[1].lower() in supported_ext_for_analysis:
+                    self.photo_for_analysis.append(os.path.join(top, _f))
+
+        if not self.photo_for_analysis:  # If no photos found
+            while True:
+                # Ask to choose another folder
+                if messagebox.askyesno(parent=self,
+                                       title=get_name('title_dia_1_photo_an'),
+                                       message=get_name('text_dia_1_photo_an')):  # Ok
+                    new_path = filedialog.askdirectory(parent=self, title=get_name("ask_dir_photo_an"))
+                    for top, _, files in os.walk(new_path):
+                        for _f in files:
+                            if os.path.splitext(_f)[1].lower() in supported_ext_for_analysis:
+                                self.photo_for_analysis.append(os.path.join(top, _f))
+                    if self.photo_for_analysis:  # Break from the loop if now photos are found
+                        break
+                else:  # Cancel
+                    # TODO: good (user-friendly) handling of negative response is needed
+                    return
 
         self.canvas_with_img = CanvasWithImage(master=self,
                                                image=self.photo_for_analysis[self.current_photo_ix],

@@ -21,8 +21,8 @@ class WinViewProj(Toplevel):
                     pady=top_level_padding)
         self.resizable(False, True)
 
-        self.tree = ttk.Treeview(master=self, columns='name start finish keywords d')
-        self.tree.heading('#0', text=get_name('projects'))
+        self.tree = ttk.Treeview(master=self, columns='name start finish keywords')
+        self.tree.heading('#0', text=get_name('project'))
         self.tree.heading('name', text=get_name('name'))
         self.tree.column('start', width=110)
         self.tree.heading('start', text=get_name('start'))
@@ -36,8 +36,6 @@ class WinViewProj(Toplevel):
             if project_file in files:
                 self.projects.append(os.path.join(root, project_file))
 
-        #TODO: remove debug print?
-        print(len(self.projects))
         for i in range(0, len(self.projects)):
             self.tree.insert('', 'end', i + 1, text=os.path.split(os.path.split(self.projects[i])[0])[1])
 
@@ -50,9 +48,11 @@ class WinViewProj(Toplevel):
             self.tree.set(i + 1, 'keywords', ' '.join(pd['keywords']))
 
         self.tree.pack(fill=Y, expand=1)
-        self.tree.bind('<Double-Button-1>', self.handle_choose_proj)
+        self.tree.bind('<Double-ButtonRelease-1>', self.handle_choose_proj)
 
     def handle_choose_proj(self, ev=None):
+        if not self.tree.focus().isnumeric():
+            return
         self.selected_proj = self.projects[int(self.tree.focus()) - 1]
         self.destroy()
         #main_window.update_project()

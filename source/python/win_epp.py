@@ -12,6 +12,7 @@ from main_config import *
 
 class WinEpp(Toplevel):
     def __init__(self, master=None, ev=None, project_dict=None):
+        self.project_file = None
 
         Toplevel.__init__(self, master)
         self.title(get_name("win_epp"))
@@ -79,7 +80,7 @@ class WinEpp(Toplevel):
             self.entry_finish_date.insert(0, project_dict["timeslot"]["finish"]["date"])
             self.entry_finish_time.insert(0, project_dict["timeslot"]["finish"]["time"])
             self.txt_keywords.insert('1.0', '\n'.join(project_dict["keywords"]))
-            self.txt_keywords.insert('1.0', project_dict["description"])
+            self.txt_description.insert('1.0', project_dict["description"])
         else:
             self.entry_start_date.insert(0, datetime.now().strftime("%d.%m.%Y"))
             self.entry_start_time.insert(0, "00:00")
@@ -182,9 +183,10 @@ class WinEpp(Toplevel):
 
         messagebox.showinfo(parent=self, title=get_name('msg_proj_saved_title'),
                             message='{0}\n{1}'.format(get_name('msg_proj_saved_text'), path))
+        self.project_file = os.path.join(path, project_file)
         self.close()
 
-    def close(self, ev=None):
+    def close(self, _=None):
         self.destroy()
 
     @staticmethod
