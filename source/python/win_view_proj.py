@@ -32,10 +32,11 @@ class WinViewProj(Toplevel):
 
         self.projects = []
         self.selected_proj = None
-        for root, dirs, files in os.walk(projects_dir):
+        for root, _, files in os.walk(projects_dir):
             if project_file in files:
                 self.projects.append(os.path.join(root, project_file))
 
+        #TODO: remove debug print?
         print(len(self.projects))
         for i in range(0, len(self.projects)):
             self.tree.insert('', 'end', i + 1, text=os.path.split(os.path.split(self.projects[i])[0])[1])

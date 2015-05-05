@@ -63,7 +63,7 @@ class WinPhotoAn(Toplevel):
         self.photo_for_analysis = []
 
         # Collect all photos (with allowed extensions) with paths
-        for top, dirs, files in os.walk(path):
+        for top, _, files in os.walk(path):
             for _f in files:
                 if os.path.splitext(_f)[1].lower() in supported_ext_for_analysis:
                     self.photo_for_analysis.append(os.path.join(top, _f))

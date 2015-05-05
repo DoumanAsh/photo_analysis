@@ -2,7 +2,7 @@
 from os import path
 from json import load as json_load
 
-supported_ext_for_analysis = ['.jpg']
+supported_ext_for_analysis = {'.jpg', 'jpeg'}
 
 # Interface
 language = 'ru'

@@ -15,7 +15,6 @@ def write_tags_to_image_via_et(image, tags):
 
     for tag in tags:
         if tag.lower() == "keywords":
-            #index list tags by string?
             for i in tags[tag]:
                 options.append('-iptc:{0}={1}'.format(tag, i))
         else:

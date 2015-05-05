@@ -28,7 +28,7 @@ def get_exif_field(img_name, field):
         decoded = TAGS.get(tag, tag)
         fields[decoded] = value
 
-    if field in fields.keys():
+    if field in fields:
         return fields[field]
     else:
         return None

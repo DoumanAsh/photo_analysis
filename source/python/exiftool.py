@@ -13,10 +13,7 @@ def get_data_from_image(image, option):
     p = Popen(cmd1, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     out, err = p.communicate()
     """
-    options = ['-j', '-g', str(image), str(option)]
-
-    cmd = [exiftool]
-    cmd.extend(options)
+    cmd = [exiftool, '-j', '-g', str(image), str(option)]
 
     trace.debug('Cmd: {0}'.format(cmd))
 
