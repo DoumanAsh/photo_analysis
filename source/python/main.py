@@ -11,9 +11,13 @@ class Settings():
     def __init__(self, test=None):
         self.test = test
 
-if __name__ == "__main__"
+if __name__ == "__main__":
     root = Tk()
-    root.geometry("300x300+100+100")
+    root.geometry("+100+100")
+    root.config(width=300,
+                background=main_bg,
+                padx=top_level_padding,
+                pady=top_level_padding)
     style = ttk.Style()
     style.theme_use('clam')
     style.configure(style=".", background=main_bg, foreground=main_fg)

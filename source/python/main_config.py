@@ -2,14 +2,14 @@
 from os import path
 from json import load as json_load
 
-supported_ext_for_analysis = {'.jpg', 'jpeg'}
+supported_ext_for_analysis = {'.jpg', '.jpeg'}
 
 # Interface
 language = 'ru'
 top_level_padding = 5
 min_preview_size = 150
 max_preview_size = 750
-main_bg = '#999999'
+main_bg = '#BBBBBB'
 main_fg = '#000000'
 btn_bg = '#DDDDDD'
 btn_fg = '#000000'
