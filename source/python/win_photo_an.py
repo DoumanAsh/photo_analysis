@@ -60,8 +60,44 @@ class CanvasWithImage(Canvas):
 
 
 class WinPhotoAn(Toplevel):
-    def __init__(self, master=None, path=None):
+    def __init__(self, master=None, path=None, project_keywords=None):
         self.photo_for_analysis = []
+        self.project_keywords = project_keywords
+        self.master = master
+
+        # Collect all photos (with allowed extensions) with paths
+        for top, _, files in os.walk(path):
+            for _f in files:
+                if os.path.splitext(_f)[1].lower() in supported_ext_for_analysis:
+                    self.photo_for_analysis.append(os.path.join(top, _f))
+
+        if not self.photo_for_analysis:  # If no photos found
+            if project_keywords is not None:  # If photo analysis was requested from project
+                raise ValueError
+            while True:
+                # Ask to choose another folder
+                # Use main window as parent for dialog, because TopLevel window for this class is not created yet
+                if messagebox.askyesno(parent=self.master,
+                                       title=get_name('title_dia_1_photo_an'),
+                                       message=get_name('text_dia_1_photo_an')):  # Ok
+                    # Use main window as parent for dialog, because TopLevel window for this class is not created yet
+                    new_path = filedialog.askdirectory(parent=self.master, title=get_name("ask_dir_photo_an"))
+                    for top, _, files in os.walk(new_path):
+                        for _f in files:
+                            if os.path.splitext(_f)[1].lower() in supported_ext_for_analysis:
+                                self.photo_for_analysis.append(os.path.join(top, _f))
+                    if self.photo_for_analysis:  # Break from the loop if now photos are found
+                        break
+                else:  # Cancel
+                    raise ValueError
+
+        # If photo analyzer is called not from project
+        if self.project_keywords is None:
+            # Check project file in selected folder
+            if os.path.isfile(os.path.join(path, project_file)):
+                # Load keywords from project file
+                with open(os.path.join(path, project_file), encoding='utf-8') as fj:
+                    self.project_keywords = json_load(fj)["keywords"]
 
         Toplevel.__init__(self, master)
         self.geometry("+200+200")
@@ -73,29 +109,6 @@ class WinPhotoAn(Toplevel):
         self.title(get_name("win_photo_an"))
 
         self.current_photo_ix = 0
-
-        # Collect all photos (with allowed extensions) with paths
-        for top, _, files in os.walk(path):
-            for _f in files:
-                if os.path.splitext(_f)[1].lower() in supported_ext_for_analysis:
-                    self.photo_for_analysis.append(os.path.join(top, _f))
-
-        if not self.photo_for_analysis:  # If no photos found
-            while True:
-                # Ask to choose another folder
-                if messagebox.askyesno(parent=self,
-                                       title=get_name('title_dia_1_photo_an'),
-                                       message=get_name('text_dia_1_photo_an')):  # Ok
-                    new_path = filedialog.askdirectory(parent=self, title=get_name("ask_dir_photo_an"))
-                    for top, _, files in os.walk(new_path):
-                        for _f in files:
-                            if os.path.splitext(_f)[1].lower() in supported_ext_for_analysis:
-                                self.photo_for_analysis.append(os.path.join(top, _f))
-                    if self.photo_for_analysis:  # Break from the loop if now photos are found
-                        break
-                else:  # Cancel
-                    # TODO: good (user-friendly) handling of negative response is needed
-                    return
 
         self.canvas_with_img = CanvasWithImage(master=self,
                                                image=self.photo_for_analysis[self.current_photo_ix],
@@ -123,6 +136,14 @@ class WinPhotoAn(Toplevel):
                                                     onvalue='True',
                                                     offvalue='False')
 
+        self.ch_btn_project_an_value = StringVar()
+        self.ch_btn_project_an_value.set(settings['photo_an']['project_an'])
+        self.ch_btn_project_an = ttk.Checkbutton(master=self.frame_analysis_type,
+                                                 text=get_name("ch_btn_project_an"),
+                                                 variable=self.ch_btn_project_an_value,
+                                                 onvalue='True',
+                                                 offvalue='False')
+
         self.btn_analyze = ttk.Button(master=self.frame_controls, text=get_name("btn_analyze"))
         self.btn_analyze.bind('<ButtonRelease-1>', self.analyze)
         self.btn_save = ttk.Button(master=self.frame_controls, text=get_name("btn_save"))
@@ -133,14 +154,18 @@ class WinPhotoAn(Toplevel):
         self.canvas_with_img.pack(fill=BOTH, side=LEFT)
         self.frame_main.pack(fill=BOTH, side=LEFT)
         self.frame_controls.pack(fill=X)
-        self.frame_analysis_type.pack()
-        self.ch_btn_geo_an.pack(side=LEFT)
-        self.ch_btn_obj_detect_an.pack(side=LEFT)
-        self.btn_analyze.pack(side=LEFT)
-        self.btn_save.pack(side=LEFT)
+        self.frame_analysis_type.pack(fill=X)
+        self.ch_btn_geo_an.grid(sticky=W, row=0, column=0)
+        self.ch_btn_obj_detect_an.grid(sticky=W, row=1, column=0)
+        self.ch_btn_project_an.grid(sticky=W, row=2, column=0)
+        self.btn_analyze.pack(side=LEFT, fill=X)
+        self.btn_save.pack(side=LEFT, fill=X)
         self.frame_results.pack(fill=X)
 
-    def next_photo(self, ev=None):
+    def next_photo(self, ev):
+        if len(self.photo_for_analysis) == 1:
+            return
+
         x, y = ev.x, ev.y
         if x > self.canvas_with_img.width / 2:
             self.current_photo_ix += 1
@@ -190,7 +215,12 @@ class WinPhotoAn(Toplevel):
             var.set(self.ch_btn_keywords_value.get())
     # ==================================================================================================================
 
-    def analyze(self, ev=None):
+    def analyze(self, _=None):
+        # Recreate frame with results to clean up previous data
+        self.frame_results.destroy()
+        self.frame_results = ttk.Frame(master=self.frame_main, padding=5)
+        self.frame_results.pack(fill=X)
+
         # Dictionary to combine results of all analysis types together
         results = {}
 
@@ -214,19 +244,19 @@ class WinPhotoAn(Toplevel):
                 self.frame_address_info = ttk.Frame(master=self.frame_results, padding=(7, 0))
                 self.frame_address_info.pack(fill=X)
 
-        self.ch_btn_addr = []
-        self.ch_btn_addr_values = []
-        for name in sorted(results):
-            # Skip keywords here, they will be displayed later
-            if name == "keywords":
-                continue
-            self.ch_btn_addr_values.append(StringVar())
-            self.ch_btn_addr_values[-1].set(1)
-            self.ch_btn_addr.append(ttk.Checkbutton(master=self.frame_address_info,
-                                                    text=results[name],
-                                                    variable=self.ch_btn_addr_values[-1]))
+                self.ch_btn_addr = []
+                self.ch_btn_addr_values = []
+                for name in sorted(results):
+                    # Skip keywords here, they will be displayed later
+                    if name == "keywords":
+                        continue
+                    self.ch_btn_addr_values.append(StringVar())
+                    self.ch_btn_addr_values[-1].set(1)
+                    self.ch_btn_addr.append(ttk.Checkbutton(master=self.frame_address_info,
+                                                            text=results[name],
+                                                            variable=self.ch_btn_addr_values[-1]))
 
-            self.ch_btn_addr[-1].grid(row=len(self.ch_btn_addr) - 1, column=0, sticky=W)
+                    self.ch_btn_addr[-1].grid(row=len(self.ch_btn_addr) - 1, column=0, sticky=W)
 
         if self.ch_btn_obj_detect_an_value.get() == "True":
             msg = self.show_msg(get_name("msg_run_obj_detect_an"))
@@ -239,7 +269,14 @@ class WinPhotoAn(Toplevel):
 
             msg.destroy()
 
-        if results["keywords"]:
+        if self.ch_btn_project_an_value.get() == "True" and self.project_keywords is not None:
+            if "keywords" in results:
+                results["keywords"].extend(self.project_keywords)
+            else:
+                results["keywords"] = self.project_keywords
+
+        # If we have key "keywords" and keywords list is not empty
+        if "keywords" in results and results["keywords"]:
             self.ch_btn_keywords_value = StringVar()
             self.ch_btn_keywords_value.set(1)
             self.ch_btn_keywords = ttk.Checkbutton(master=self.frame_results,

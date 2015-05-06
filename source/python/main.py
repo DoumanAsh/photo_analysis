@@ -14,14 +14,19 @@ class Settings():
 if __name__ == "__main__":
     root = Tk()
     root.geometry("+100+100")
+    root.resizable(FALSE, FALSE)
     root.config(width=300,
                 background=main_bg,
                 padx=top_level_padding,
                 pady=top_level_padding)
     style = ttk.Style()
     style.theme_use('clam')
-    style.configure(style=".", background=main_bg, foreground=main_fg)
+    style.configure(style=".",
+                    background=main_bg,
+                    foreground=main_fg,
+                    font=["Cambria", 12])
     style.configure(style="TLabelframe", padding=3)
+    style.configure(style="Treeview", font=["Calibri", 10])
     style.configure(style="TButton", background=btn_bg, foreground=btn_fg)
     root.config(background=main_bg)
     root.title(get_name("win_main"))

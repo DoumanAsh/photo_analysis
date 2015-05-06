@@ -2,7 +2,7 @@
 # External modules
 import os
 from tkinter import *
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, font
 from tkinter import ttk
 # Internal modules
 from main_config import *
@@ -71,28 +71,65 @@ class WinMain():
         self.menubar.add_cascade(label=get_name("menu_help"),
                                  menu=self.menu_help)
 
-        self.frame_proj_info = None
-        self.lbl_name = None
-        self.lbl_start = None
-        self.lbl_finish = None
-        self.lbl_keywords = None
-        self.lbl_description = None
-        self.frame_proj_controls = None
-        self.btn_analyze_photo = None
-        self.btn_edit = None
-        self.btn_get_stat = None
-        self.btn_close_proj = None
+        self.frame_welcome = None
+        self.frame_project = None
+        self.create_frame_welcome()
+
+    def create_frame_welcome(self):
+        self.frame_welcome = ttk.Frame(master=self.master)
+        self.frame_default_controls = ttk.Frame(master=self.frame_welcome)
+
+        self.btn_open_proj = ttk.Button(master=self.frame_default_controls, text=get_name("cmd_open_project"))
+        self.btn_create_proj = ttk.Button(master=self.frame_default_controls, text=get_name("cmd_create_project"))
+        self.btn_view_proj = ttk.Button(master=self.frame_default_controls, text=get_name("cmd_view_proj"))
+        self.btn_save_photo = ttk.Button(master=self.frame_default_controls, text=get_name("cmd_save_photo"))
+        self.btn_analyse_photo = ttk.Button(master=self.frame_default_controls, text=get_name("cmd_analyse_photo"))
+
+        self.btn_open_proj.bind('<ButtonRelease-1>', lambda _: self.cmd_open_project())
+        self.btn_create_proj.bind('<ButtonRelease-1>', lambda _: self.cmd_create_project())
+        self.btn_view_proj.bind('<ButtonRelease-1>', lambda _: self.cmd_view_proj())
+        self.btn_save_photo.bind('<ButtonRelease-1>', lambda _: self.cmd_save_photo())
+        self.btn_analyse_photo.bind('<ButtonRelease-1>', lambda _: self.cmd_analyse_photo())
+
+        self.lbl_welcome1 = ttk.Label(master=self.frame_welcome,
+                                      text=get_name("welcome_text1"),
+                                      justify=CENTER,
+                                      padding=10,
+                                      font=["Segoe Print", 16])
+
+
+        self.lbl_welcome2 = ttk.Label(master=self.frame_welcome,
+                                      text=get_name("welcome_text2"),
+                                      justify=CENTER,
+                                      padding=10,
+                                      font=["Segoe Print", 12])
+
+        self.frame_welcome.pack(fill=BOTH)
+        self.lbl_welcome1.grid(row=0, column=0)
+        self.lbl_welcome2.grid(row=1, column=0)
+        self.frame_default_controls.grid(rowspan=2, row=0, column=1)
+        self.btn_open_proj.pack(fill=X)
+        self.btn_create_proj.pack(fill=X)
+        self.btn_view_proj.pack(fill=X)
+        self.btn_save_photo.pack(fill=X)
+        self.btn_analyse_photo.pack(fill=X)
 
     def project_selected(self):
+        if self.frame_welcome is not None:
+            self.frame_welcome.destroy()
+            self.frame_welcome = None
+
         self.menu_project.entryconfig(1, state=ACTIVE)
 
         with open(self.project_file, encoding='utf-8') as f:
             self.project_dict = json_load(f)
 
-        if self.frame_proj_info is not None:
-            self.frame_proj_info.destroy()
+        if self.frame_project is not None:
+            self.frame_project.destroy()
 
-        self.frame_proj_info = ttk.LabelFrame(master=self.master, text=get_name("frame_proj_info"))
+
+        self.frame_project = ttk.Frame(master=self.master)
+        self.frame_proj_info = ttk.LabelFrame(master=self.frame_project, text=get_name("frame_proj_info"))
         self.lbl_name = ttk.Label(master=self.frame_proj_info,
                                   justify=LEFT,
                                   text='{0}: {1}'.format(get_name('name'),
@@ -108,21 +145,26 @@ class WinMain():
                                     text='{0}: {1} {2}'.format(get_name('finish'),
                                                                self.project_dict['timeslot']['finish']['time'],
                                                                self.project_dict['timeslot']['finish']['date']))
+
+        if self.project_dict['keywords']:
+            val = self.project_dict['keywords']
+        else:
+            val = get_name("empty")
         self.lbl_keywords = ttk.Label(master=self.frame_proj_info,
                                       justify=LEFT,
                                       wraplength=450,
-                                      text='{0}:\n{1}'.format(get_name('keywords'),
-                                                             self.project_dict['keywords']))
+                                      text='{0}:\n{1}'.format(get_name('keywords'), val))
+
+        if self.project_dict['description'].rstrip():
+            val = self.project_dict['description']
+        else:
+            val = get_name("empty")
         self.lbl_description = ttk.Label(master=self.frame_proj_info,
                                          justify=LEFT,
                                          wraplength=450,
-                                         text='{0}:\n{1}'.format(get_name('description'),
-                                                                 self.project_dict['description']))
+                                         text='{0}:\n{1}'.format(get_name('description'), val))
 
-        if self.frame_proj_controls is not None:
-            self.frame_proj_controls.destroy()
-
-        self.frame_proj_controls = ttk.LabelFrame(master=self.master, text=get_name("frame_proj_controls"))
+        self.frame_proj_controls = ttk.LabelFrame(master=self.frame_project, text=get_name("frame_proj_controls"))
         self.btn_analyze_photo = ttk.Button(master=self.frame_proj_controls, text=get_name("btn_analyze_photo"))
         self.btn_edit = ttk.Button(master=self.frame_proj_controls, text=get_name("btn_edit"))
         self.btn_get_stat = ttk.Button(master=self.frame_proj_controls, text=get_name("btn_get_stat"))
@@ -133,6 +175,7 @@ class WinMain():
         self.btn_get_stat.bind('<ButtonRelease-1>', self.get_project_stat)
         self.btn_close_proj.bind('<ButtonRelease-1>', lambda _: self.cmd_close_project())
 
+        self.frame_project.pack(fill=BOTH)
         self.frame_proj_info.pack(side=LEFT, fill=BOTH)
         self.lbl_name.pack(fill=X)
         self.lbl_start.pack(fill=X)
@@ -150,8 +193,19 @@ class WinMain():
         if self.win_photo_an:
             self.win_photo_an.destroy()
 
-        # Create window from class and save pointer
-        self.win_photo_an = WinPhotoAn(master=self.master, path=os.path.split(self.project_file)[0])
+        try:
+            # Create window from class and save pointer
+            self.win_photo_an = WinPhotoAn(master=self.master,
+                                           path=os.path.split(self.project_file)[0],
+                                           project_keywords=self.project_dict["keywords"])
+
+        # This exception will be raised if user chooses a project without photo
+        except ValueError:
+            messagebox.showerror(parent=self.master,
+                                 title=get_name("title_error_no_photo_in_project"),
+                                 message=get_name("text_error_no_photo_in_project"))
+            return
+
         # Bind handler on destroying to clean up self class
         self.win_photo_an.bind("<Destroy>", self.handle_destroy_win_photo_an)
 
@@ -171,31 +225,25 @@ class WinMain():
         pass
 
     def cmd_open_project(self):
-        # If pointer is defined just switch focus to the window
-        if self.win_photo_an:
-            self.win_photo_an.focus_force()
-            return
-
-        fn = filedialog.askopenfilename(title=get_name("ask_dir_photo_an"),
+        fn = filedialog.askopenfilename(parent=self.master,
+                                        title=get_name("ask_project_file"),
                                         filetypes=[(get_name("photo_projects"),
                                                     "*.json")],
                                         initialdir=projects_dir)
-        if not fn:
-            return
-
-        self.project_file = fn
-        self.project_selected()
+        if fn:
+            self.project_file = fn
+            self.project_selected()
 
     def cmd_close_project(self):
         self.project_dict = None
         self.project_file = None
         self.menu_project.entryconfig(1, state=DISABLED)
-        if self.frame_proj_info is not None:
-            self.frame_proj_info.destroy()
-        if self.frame_proj_controls is not None:
-            self.frame_proj_controls.destroy()
+        if self.frame_project is not None:
+            self.frame_project.destroy()
+            self.frame_project = None
+            self.create_frame_welcome()
 
-    def cmd_settings(self, ev=None):
+    def cmd_settings(self, _=None):
         # Create window from class and save pointer
         self.win_settings = WinSettings(master=self.master)
         # Bind handler on destroying to clean up self class
@@ -268,7 +316,15 @@ class WinMain():
         # Create window from class and save pointer
         path = filedialog.askdirectory(title=get_name("ask_dir_photo_an"))
         if path:
-            self.win_photo_an = WinPhotoAn(master=self.master, path=path)
+            try:
+                # Create window from class and save pointer
+                self.win_photo_an = WinPhotoAn(master=self.master, path=path)
+
+            # This exception will be raised if user chooses folder without photo
+            # and rejects suggestion to choose another folder
+            except ValueError:
+                return
+
             # Bind handler on destroying to clean up self class
             self.win_photo_an.bind("<Destroy>", self.handle_destroy_win_photo_an)
 

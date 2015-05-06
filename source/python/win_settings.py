@@ -50,6 +50,14 @@ class WinSettings(Toplevel):
                                                     onvalue='True',
                                                     offvalue='False')
 
+        self.ch_btn_project_an_value = StringVar()
+        self.ch_btn_project_an_value.set(settings['photo_an']['project_an'])
+        self.ch_btn_project_an = ttk.Checkbutton(master=self.frame_analysis_type,
+                                                 text=get_name("ch_btn_project_an"),
+                                                 variable=self.ch_btn_project_an_value,
+                                                 onvalue='True',
+                                                 offvalue='False')
+
         # ==============================================================================================================
         self.frame_buttons = ttk.Frame(master=self)
         self.btn_save = ttk.Button(master=self.frame_buttons, text=get_name("btn_save"))
@@ -67,6 +75,7 @@ class WinSettings(Toplevel):
         self.frame_analysis_type.pack(fill=X)
         self.ch_btn_geo_an.pack(side=LEFT)
         self.ch_btn_obj_detect_an.pack(side=LEFT)
+        self.ch_btn_project_an.pack(side=LEFT)
         self.frame_buttons.pack(fill=X)
         self.btn_save.pack(side=LEFT)
         self.btn_cancel.pack(side=LEFT)
