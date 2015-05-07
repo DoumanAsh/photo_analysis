@@ -100,6 +100,7 @@ class WinPhotoAn(Toplevel):
                     self.project_keywords = json_load(fj)["keywords"]
 
         Toplevel.__init__(self, master)
+        self.bind('<Escape>', lambda _: self.destroy())
         self.geometry("+200+200")
         self.config(background=main_bg,
                     padx=top_level_padding,

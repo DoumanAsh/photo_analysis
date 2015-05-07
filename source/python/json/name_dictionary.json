@@ -73,7 +73,11 @@
   "text_dia_1_photo_an":   {"en": "Photographs have not been found in selected location.\nDo you want to choose another location?",
                             "ru": "В выбранной папке не было найдено фотографий.\nХотите выбрать другую папку?"},
 
-  "win_view_proj":         {"en": "View projects",       "ru": "Просмотр проектов"},
-  "project":               {"en": "Project",             "ru": "Проект"},
+  "win_view_proj":           {"en": "View projects",            "ru": "Просмотр проектов"},
+  "project_num":             {"en": "Project #",                "ru": "№ проекта"},
+  "total_num_of_proj":       {"en": "Total number of projects", "ru": "Общее число проектов"},
+  "ask_conf_del_proj_title": {"en": "Confirm deletion",         "ru": "Подтвердите удаление"},
+  "ask_conf_del_proj_text":  {"en": "Do you really want to delete the project?",
+                              "ru": "Вы действительно хотите удалить этот проект"},
   "": {"en": "", "ru": ""}
 }
