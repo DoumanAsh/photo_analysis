@@ -111,9 +111,9 @@ class WinEpp(Toplevel):
         self.btn_save.pack(side=LEFT)
         self.btn_cancel.pack(side=LEFT)
 
-    def save_project(self, ev=None):
+    def save_project(self, _=None):
         # Check projects directory
-        if not os.path.isdir(projects_dir):
+        if not os.path.isdir(settings["projects_dir"]):
             messagebox.showerror(parent=self, title=get_name('msg_wrong_proj_dir_title'),
                                  message=get_name('msg_wrong_proj_dir_text'))
 
@@ -163,7 +163,7 @@ class WinEpp(Toplevel):
             path = '{0}-{1}-{2}-{3}'.format(path, splitted_finish_date[2], splitted_finish_date[1], splitted_finish_date[0])
         path = '{0}_{1}'.format(path, proj_dict["name"].replace(' ', '_'))
 
-        path = os.path.normpath(os.path.join(projects_dir, path))
+        path = os.path.normpath(os.path.join(settings["projects_dir"], path))
 
         # Create a new folder for project if not exist
         if os.path.isdir(path):

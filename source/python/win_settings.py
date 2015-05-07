@@ -10,6 +10,8 @@ from main_config import *
 
 class WinSettings(Toplevel):
     def __init__(self, master=None):
+        self.projects_dir = settings["projects_dir"]
+
         Toplevel.__init__(self, master)
         self.geometry("+200+200")
         self.config(background=main_bg,
@@ -20,6 +22,11 @@ class WinSettings(Toplevel):
 
         # Declare elements
         # ==============================================================================================================
+        self.frame_proj_dir = ttk.Frame(master=self)
+        self.lbl_proj_dir = ttk.Label(master=self.frame_proj_dir, text=get_name("lbl_project_dir"))
+        self.btn_proj_dir = ttk.Button(master=self.frame_proj_dir, text=self.projects_dir)
+        self.btn_proj_dir.bind('<ButtonRelease-1>', lambda _: self.change_proj_dir())
+
         self.frame_photo_an = ttk.LabelFrame(master=self, text=get_name("frame_photo_an"))
 
         self.frame_preview_size = ttk.Frame(master=self.frame_photo_an)
@@ -67,6 +74,9 @@ class WinSettings(Toplevel):
 
         ################################################################################################################
         # Locate elements
+        self.frame_proj_dir.pack(fill=X)
+        self.lbl_proj_dir.pack(side=LEFT)
+        self.btn_proj_dir.pack(side=LEFT)
         self.frame_photo_an.pack(fill=X)
         self.frame_preview_size.pack(fill=X)
         self.lbl_preview_size.pack(side=LEFT)
@@ -80,7 +90,14 @@ class WinSettings(Toplevel):
         self.btn_save.pack(side=LEFT)
         self.btn_cancel.pack(side=LEFT)
 
-    def save_settings(self, ev=None):
+    def change_proj_dir(self):
+        new_dir = filedialog.askdirectory(parent=self, initialdir=settings["projects_dir"])
+        if new_dir:
+            self.projects_dir = new_dir
+            self.btn_proj_dir.config(text=new_dir)
+
+    def save_settings(self, _=None):
+        settings['projects_dir'] = self.projects_dir
         settings['photo_an']['preview_size'] = (int(self.scale_preview_size.get() / 10) * 10)
         settings['photo_an']['geo_an'] = self.ch_btn_geo_an_value.get()
         settings['photo_an']['obj_detect_an'] = self.ch_btn_obj_detect_an_value.get()
@@ -88,8 +105,8 @@ class WinSettings(Toplevel):
             json.dump(settings, f)
         self.destroy()
 
-    def close(self, ev=None):
+    def close(self, _=None):
         self.destroy()
 
-    def scale_preview_size_change(self, ev=None):
+    def scale_preview_size_change(self, _=None):
         self.lbl_preview_size_value.config(text=str(int(self.scale_preview_size.get() / 10) * 10))

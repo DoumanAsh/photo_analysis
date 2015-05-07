@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # External modules
 import os
+from datetime import datetime
 from tkinter import *
 from tkinter import filedialog, messagebox, font
 from tkinter import ttk
@@ -10,7 +11,7 @@ from win_photo_an import WinPhotoAn
 from win_epp import WinEpp
 from win_settings import WinSettings
 from win_view_proj import WinViewProj
-
+import exiftool as et
 
 class WinMain():
     def __init__(self, master=None):
@@ -229,7 +230,7 @@ class WinMain():
                                         title=get_name("ask_project_file"),
                                         filetypes=[(get_name("photo_projects"),
                                                     "*.json")],
-                                        initialdir=projects_dir)
+                                        initialdir=settings["projects_dir"])
         if fn:
             self.project_file = fn
             self.project_selected()
@@ -305,7 +306,75 @@ class WinMain():
         self.win_view_proj = None
 
     def cmd_save_photo(self):
-        pass
+        dir_with_photo = filedialog.askdirectory(parent=self.master, title=get_name("dia_save_photo"), initialdir='/')
+        if not dir_with_photo:
+            return
+
+        # Get list of files to save
+        photos_for_saving_with_date = {}
+        photos_for_saving_without_date = []
+        for root, _, files in os.walk(dir_with_photo):
+            for file in files:
+                if os.path.splitext(file)[-1].lower() in supported_image_ext:
+                    possible_dt = ''
+                    # Try to get date/time from filename
+                    for name_part in os.path.splitext(file)[0].replace('-', ' ').replace('_', ' ').split():
+                        # Collect all numeric parts of filename
+                        if name_part.isnumeric():
+                            possible_dt = '{0}:{1}'.format(possible_dt, name_part)
+                    try:
+                        # Try to convert collected numeric parts into datetime object
+                        dt = datetime.strptime(possible_dt, ':%Y:%m:%d:%H:%M:%S')
+                    # If date/time were not found in filename
+                    except ValueError:
+                        try:
+                            # Try to find date/time in metadata
+                            possible_dt = et.get_data_from_image(os.path.join(root, file),
+                                                                 "-EXIF:DateTimeOriginal")["EXIF"]["DateTimeOriginal"]
+                            dt = datetime.strptime(possible_dt, '%Y:%m:%d %H:%M:%S')
+                        # If date/time were not found in metadata too
+                        except KeyError:
+                            photos_for_saving_without_date.append(os.path.join(root, file))
+                            continue
+                    photos_for_saving_with_date[dt.strftime('%Y-%m-%d %H:%M:%S')] = [os.path.join(root, file), None]
+
+        # Get max and min dates from files which are going to be saved
+        sorted_photo_dt = sorted(photos_for_saving_with_date)
+        min_date = datetime.strptime(sorted_photo_dt[0].split()[0], '%Y-%m-%d')
+        max_date = datetime.strptime(sorted_photo_dt[-1].split()[0], '%Y-%m-%d')
+
+        # Collect projects which are between min and max dates
+        proposed_projects = []
+        for d in os.listdir(settings["projects_dir"]):
+            dates = str(d.split('_')[0])
+            if len(dates) > 11:
+                prj_start = datetime.strptime(dates[:10], '%Y-%m-%d')
+                prj_finish = datetime.strptime(dates[11:], '%Y-%m-%d')
+            else:
+                prj_start = datetime.strptime(dates, '%Y-%m-%d')
+                prj_finish = prj_start
+            if prj_start >= min_date and prj_finish <= max_date:
+                proposed_projects.append(os.path.join(settings["projects_dir"], d, project_file))
+
+        # Connect photo and project basing on date/time
+        for project in proposed_projects:
+            with open(project, encoding='utf-8') as _f:
+                pd = json_load(_f)
+
+            # Parse project timeslot
+            prj_start = '{0} {1}'.format(pd["timeslot"]["start"]["date"], pd["timeslot"]["start"]["time"])
+            prj_start = datetime.strptime(prj_start, "%d.%m.%Y %H:%M")
+            prj_finish = '{0} {1}'.format(pd["timeslot"]["finish"]["date"], pd["timeslot"]["finish"]["time"])
+            prj_finish = datetime.strptime(prj_finish, "%d.%m.%Y %H:%M")
+
+            for key in photos_for_saving_with_date:
+                # Skip photo, if project is already assigned to this photo
+                if photos_for_saving_with_date[key][1] is not None:
+                    continue
+
+                dt = datetime.strptime(key, '%Y-%m-%d %H:%M:%S')
+                if prj_start <= dt <= prj_finish:  # If photo date/time in project timeslot
+                    photos_for_saving_with_date[key][1] = os.path.split(project)[0]
 
     def cmd_analyse_photo(self):
         # If pointer is defined just switch focus to the window

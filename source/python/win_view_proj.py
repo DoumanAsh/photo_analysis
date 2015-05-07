@@ -10,8 +10,9 @@ from json import load as json_load
 from main_config import *
 #from main import main_window
 
+
 class WinViewProj(Toplevel):
-    def __init__(self, master=None, ev=None, project_dict=None):
+    def __init__(self, master=None):
         Toplevel.__init__(self, master)
         self.title(get_name("win_view_proj"))
         self.focus_force()
@@ -32,25 +33,25 @@ class WinViewProj(Toplevel):
 
         self.projects = []
         self.selected_proj = None
-        for root, _, files in os.walk(projects_dir):
+        for root, _, files in os.walk(settings["projects_dir"]):
             if project_file in files:
                 self.projects.append(os.path.join(root, project_file))
 
-        for i in range(0, len(self.projects)):
-            self.tree.insert('', 'end', i + 1, text=os.path.split(os.path.split(self.projects[i])[0])[1])
+        for ix, proj in enumerate(self.projects, start=1):
+            self.tree.insert('', 'end', ix, text=os.path.split(os.path.split(proj)[0])[1])
 
-            with open(self.projects[i], encoding='utf-8') as f:
+            with open(proj, encoding='utf-8') as f:
                 pd = json_load(f)
 
-            self.tree.set(i + 1, 'name', pd['name'])
-            self.tree.set(i + 1, 'start', ' '.join((pd['timeslot']['start']['date'], pd['timeslot']['start']['time'])))
-            self.tree.set(i + 1, 'finish', ' '.join((pd['timeslot']['finish']['date'], pd['timeslot']['finish']['time'])))
-            self.tree.set(i + 1, 'keywords', ' '.join(pd['keywords']))
+            self.tree.set(ix, 'name', pd['name'])
+            self.tree.set(ix, 'start', ' '.join((pd['timeslot']['start']['date'], pd['timeslot']['start']['time'])))
+            self.tree.set(ix, 'finish', ' '.join((pd['timeslot']['finish']['date'], pd['timeslot']['finish']['time'])))
+            self.tree.set(ix, 'keywords', ' '.join(pd['keywords']))
 
         self.tree.pack(fill=Y, expand=1)
         self.tree.bind('<Double-ButtonRelease-1>', self.handle_choose_proj)
 
-    def handle_choose_proj(self, ev=None):
+    def handle_choose_proj(self, _=None):
         if not self.tree.focus().isnumeric():
             return
         self.selected_proj = self.projects[int(self.tree.focus()) - 1]

@@ -3,6 +3,7 @@ from os import path
 from json import load as json_load
 
 supported_ext_for_analysis = {'.jpg', '.jpeg'}
+supported_image_ext = {'.jpg', '.jpeg', '.cr2'}
 
 # Interface
 language = 'ru'
@@ -35,7 +36,6 @@ with open('json/name_dictionary.json', encoding='utf-8') as _f:
 with open(settings_json, encoding='utf-8') as _f:
     settings = json_load(_f)
 
-projects_dir = 'D:/Photo_projects'
 project_file = 'photo_project.json'
 
 
