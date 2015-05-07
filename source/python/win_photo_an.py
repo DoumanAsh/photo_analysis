@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # External modules
-import os
+from os import walk as os_walk
+from os import path as os_path
 from tkinter import *
 from tkinter import filedialog, messagebox
 from tkinter import ttk
@@ -66,10 +67,10 @@ class WinPhotoAn(Toplevel):
         self.master = master
 
         # Collect all photos (with allowed extensions) with paths
-        for top, _, files in os.walk(path):
+        for top, _, files in os_walk(path):
             for _f in files:
-                if os.path.splitext(_f)[1].lower() in supported_ext_for_analysis:
-                    self.photo_for_analysis.append(os.path.join(top, _f))
+                if os_path.splitext(_f)[1].lower() in supported_ext_for_analysis:
+                    self.photo_for_analysis.append(os_path.join(top, _f))
 
         if not self.photo_for_analysis:  # If no photos found
             if project_keywords is not None:  # If photo analysis was requested from project
@@ -82,10 +83,10 @@ class WinPhotoAn(Toplevel):
                                        message=get_name('text_dia_1_photo_an')):  # Ok
                     # Use main window as parent for dialog, because TopLevel window for this class is not created yet
                     new_path = filedialog.askdirectory(parent=self.master, title=get_name("ask_dir_photo_an"))
-                    for top, _, files in os.walk(new_path):
+                    for top, _, files in os_walk(new_path):
                         for _f in files:
-                            if os.path.splitext(_f)[1].lower() in supported_ext_for_analysis:
-                                self.photo_for_analysis.append(os.path.join(top, _f))
+                            if os_path.splitext(_f)[1].lower() in supported_ext_for_analysis:
+                                self.photo_for_analysis.append(os_path.join(top, _f))
                     if self.photo_for_analysis:  # Break from the loop if now photos are found
                         break
                 else:  # Cancel
@@ -94,9 +95,9 @@ class WinPhotoAn(Toplevel):
         # If photo analyzer is called not from project
         if self.project_keywords is None:
             # Check project file in selected folder
-            if os.path.isfile(os.path.join(path, project_file)):
+            if os_path.isfile(os_path.join(path, project_file)):
                 # Load keywords from project file
-                with open(os.path.join(path, project_file), encoding='utf-8') as fj:
+                with open(os_path.join(path, project_file), encoding='utf-8') as fj:
                     self.project_keywords = json_load(fj)["keywords"]
 
         Toplevel.__init__(self, master)

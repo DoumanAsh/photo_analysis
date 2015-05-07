@@ -4,8 +4,9 @@ from tkinter import *
 from tkinter import filedialog, messagebox
 from tkinter import ttk
 from datetime import datetime
-import os
 from json import load as json_load
+from os import path as os_path
+from os import walk as os_walk
 # Internal modules
 from main_config import *
 #from main import main_window
@@ -33,12 +34,12 @@ class WinViewProj(Toplevel):
 
         self.projects = []
         self.selected_proj = None
-        for root, _, files in os.walk(settings["projects_dir"]):
+        for root, _, files in os_walk(settings["projects_dir"]):
             if project_file in files:
-                self.projects.append(os.path.join(root, project_file))
+                self.projects.append(os_path.join(root, project_file))
 
         for ix, proj in enumerate(self.projects, start=1):
-            self.tree.insert('', 'end', ix, text=os.path.split(os.path.split(proj)[0])[1])
+            self.tree.insert('', 'end', ix, text=os_path.split(os_path.split(proj)[0])[1])
 
             with open(proj, encoding='utf-8') as f:
                 pd = json_load(f)

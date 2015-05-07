@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # External modules
-import json
+from json import dump as json_dump
 from tkinter import *
 from tkinter import filedialog, messagebox
 from tkinter import ttk
@@ -102,7 +102,7 @@ class WinSettings(Toplevel):
         settings['photo_an']['geo_an'] = self.ch_btn_geo_an_value.get()
         settings['photo_an']['obj_detect_an'] = self.ch_btn_obj_detect_an_value.get()
         with open(settings_json, 'w', encoding='utf-8') as f:
-            json.dump(settings, f)
+            json_dump(settings, f)
         self.destroy()
 
     def close(self, _=None):
