@@ -279,6 +279,7 @@ class WinPhotoAn(Toplevel):
 
         # If we have key "keywords" and keywords list is not empty
         if "keywords" in results and results["keywords"]:
+            results["keywords"] = list(set(results["keywords"]))
             self.ch_btn_keywords_value = StringVar()
             self.ch_btn_keywords_value.set(1)
             self.ch_btn_keywords = ttk.Checkbutton(master=self.frame_results,

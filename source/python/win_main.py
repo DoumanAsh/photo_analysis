@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # External modules
+from shutil import rmtree as delete_folder
 from re import compile as re_compile
 from os import path as os_path
 from os import walk as os_walk
@@ -15,6 +16,7 @@ from win_epp import WinEpp
 from win_settings import WinSettings
 from win_view_proj import WinViewProj
 import exiftool as et
+
 
 class WinMain():
     def __init__(self, master=None):
@@ -133,64 +135,88 @@ class WinMain():
 
 
         self.frame_project = ttk.Frame(master=self.master)
+
         self.frame_proj_info = ttk.LabelFrame(master=self.frame_project, text=get_name("frame_proj_info"))
-        self.lbl_name = ttk.Label(master=self.frame_proj_info,
-                                  justify=LEFT,
-                                  text='{0}: {1}'.format(get_name('name'),
-                                                         self.project_dict['name']))
-        self.lbl_start = ttk.Label(master=self.frame_proj_info,
-                                   justify=LEFT,
-                                   text='{0}: {1} {2}'.format(get_name('start'),
-                                                              self.project_dict['timeslot']['start']['time'],
-                                                              self.project_dict['timeslot']['start']['date']))
 
-        self.lbl_finish = ttk.Label(master=self.frame_proj_info,
-                                    justify=LEFT,
-                                    text='{0}: {1} {2}'.format(get_name('finish'),
-                                                               self.project_dict['timeslot']['finish']['time'],
-                                                               self.project_dict['timeslot']['finish']['date']))
+        text = '''{0}:\t"{1}"
 
-        if self.project_dict['keywords']:
-            val = self.project_dict['keywords']
-        else:
-            val = get_name("empty")
-        self.lbl_keywords = ttk.Label(master=self.frame_proj_info,
-                                      justify=LEFT,
-                                      wraplength=450,
-                                      text='{0}:\n{1}'.format(get_name('keywords'), val))
+{2}:\t{3}\t{4}
+{5}:\t{6}\t{7}
 
-        if self.project_dict['description'].rstrip():
-            val = self.project_dict['description']
-        else:
-            val = get_name("empty")
-        self.lbl_description = ttk.Label(master=self.frame_proj_info,
-                                         justify=LEFT,
-                                         wraplength=450,
-                                         text='{0}:\n{1}'.format(get_name('description'), val))
+{8}:
+{9}
+
+{10}:
+{11}'''.format(get_name('name'),
+               self.project_dict['name'],
+               get_name('start'),
+               self.project_dict['timeslot']['start']['time'],
+               self.project_dict['timeslot']['start']['date'],
+               get_name('finish'),
+               self.project_dict['timeslot']['finish']['time'],
+               self.project_dict['timeslot']['finish']['date'],
+               get_name('keywords'),
+               self.project_dict['keywords'] if self.project_dict['keywords'] else get_name("empty"),
+               get_name('description'),
+               self.project_dict['description'] if self.project_dict['description'].strip() else get_name("empty"))
+
+        self.lbl_proj_info = ttk.Label(master=self.frame_proj_info,
+                                       justify=LEFT,
+                                       wraplength=450,
+                                       text=text)
 
         self.frame_proj_controls = ttk.LabelFrame(master=self.frame_project, text=get_name("frame_proj_controls"))
         self.btn_analyze_photo = ttk.Button(master=self.frame_proj_controls, text=get_name("btn_analyze_photo"))
         self.btn_edit = ttk.Button(master=self.frame_proj_controls, text=get_name("btn_edit"))
-        self.btn_get_stat = ttk.Button(master=self.frame_proj_controls, text=get_name("btn_get_stat"))
         self.btn_close_proj = ttk.Button(master=self.frame_proj_controls, text=get_name("btn_close_proj"))
+        self.btn_delete_proj = ttk.Button(master=self.frame_proj_controls, text=get_name("btn_delete_proj"))
+        self.btn_refresh = ttk.Button(master=self.frame_proj_controls, text=get_name("btn_refresh"))
 
         self.btn_analyze_photo.bind('<ButtonRelease-1>', self.analyze_photo_from_project)
         self.btn_edit.bind('<ButtonRelease-1>', self.edit_project)
-        self.btn_get_stat.bind('<ButtonRelease-1>', self.get_project_stat)
         self.btn_close_proj.bind('<ButtonRelease-1>', lambda _: self.cmd_close_project())
+        self.btn_delete_proj.bind('<ButtonRelease-1>', lambda _: self.delete_proj())
+        self.btn_refresh.bind('<ButtonRelease-1>', self.refresh)
+
+        self.frame_proj_stat = ttk.LabelFrame(master=self.frame_project, text=get_name("frame_proj_stat"))
+
+        proj_path = os_path.split(self.project_file)[0]
+        folders = next(os_walk(proj_path))[1]
+
+        if folders:
+            self.tree_folders = ttk.Treeview(master=self.frame_proj_stat,
+                                             columns=('Files', 'Nested folders'),
+                                             height=len(folders),
+                                             selectmode=NONE)
+            self.tree_folders.column('#0', stretch=False)
+            self.tree_folders.heading('#0', text=get_name('folder'))
+            self.tree_folders.column('Files', stretch=False)
+            self.tree_folders.heading('Files', text=get_name('files'))
+            self.tree_folders.column('Nested folders', stretch=False)
+            self.tree_folders.heading('Nested folders', text=get_name('nested_folders'))
+
+            for ix, folder in enumerate(folders, start=1):
+                self.tree_folders.insert('', 'end', ix, text=folder)
+                self.tree_folders.set(ix, 'Files', len(next(os_walk(os_path.join(proj_path, folder)))[2]))
+                self.tree_folders.set(ix, 'Nested folders', len(next(os_walk(os_path.join(proj_path, folder)))[1]))
+
+        else:
+            self.lbl_no_st_empty_prj = ttk.Label(master=self.frame_proj_stat, text=get_name("lbl_no_st_empty_prj"))
 
         self.frame_project.pack(fill=BOTH)
-        self.frame_proj_info.pack(side=LEFT, fill=BOTH)
-        self.lbl_name.pack(fill=X)
-        self.lbl_start.pack(fill=X)
-        self.lbl_finish.pack(fill=X)
-        self.lbl_keywords.pack(fill=X)
-        self.lbl_description.pack(fill=X)
-        self.frame_proj_controls.pack(side=LEFT, fill=BOTH)
+        self.frame_proj_info.grid(row=0, column=0, columnspan=4, sticky=W + E + N + S)
+        self.lbl_proj_info.pack(fill=X)
+        self.frame_proj_controls.grid(row=0, column=4, sticky=W + E + N + S)
         self.btn_analyze_photo.pack(fill=X)
         self.btn_edit.pack(fill=X)
-        self.btn_get_stat.pack(fill=X)
         self.btn_close_proj.pack(fill=X)
+        self.btn_delete_proj.pack(fill=X)
+        self.btn_refresh.pack(fill=X)
+        self.frame_proj_stat.grid(row=1, column=0, columnspan=5, sticky=W + E + N + S)
+        if folders:
+            self.tree_folders.pack()
+        else:
+            self.lbl_no_st_empty_prj.pack(fill=X)
 
     def analyze_photo_from_project(self, _=None):
         # TODO: show warning to user
@@ -225,8 +251,13 @@ class WinMain():
         # Bind handler on destroying to clean up self class
         self.win_epp.bind("<Destroy>", self.handle_destroy_win_epp)
 
-    def get_project_stat(self, _=None):
-        pass
+    def delete_proj(self, _=None):
+        if messagebox.askyesno(parent=self.master, title=get_name("ask_conf_del_proj_title"), message=get_name("ask_conf_del_proj_text")):
+            delete_folder(path=os_path.split(self.project_file)[0])
+            self.cmd_close_project()
+
+    def refresh(self, _=None):
+        self.project_selected()
 
     def cmd_open_project(self):
         fn = filedialog.askopenfilename(parent=self.master,
@@ -313,7 +344,7 @@ class WinMain():
         if not dir_with_photo:
             return
 
-        #regex to replace string.replace('-', ' ').replace('_', ' ')
+        # Regex to replace string.replace('-', ' ').replace('_', ' ')
         re_replace = re_compile("[-_]")
         # Get list of files to save
         photos_for_saving_with_date = {}

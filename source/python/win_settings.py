@@ -101,6 +101,7 @@ class WinSettings(Toplevel):
         settings['photo_an']['preview_size'] = (int(self.scale_preview_size.get() / 10) * 10)
         settings['photo_an']['geo_an'] = self.ch_btn_geo_an_value.get()
         settings['photo_an']['obj_detect_an'] = self.ch_btn_obj_detect_an_value.get()
+        settings['photo_an']['project_an'] = self.ch_btn_project_an_value.get()
         with open(settings_json, 'w', encoding='utf-8') as f:
             json_dump(settings, f)
         self.destroy()

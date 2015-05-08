@@ -16,8 +16,8 @@ from main_config import *
 class WinViewProj(Toplevel):
     def __init__(self, master=None):
         Toplevel.__init__(self, master)
-        self.bind('<Return>', self.handle_choose_proj)
-        self.bind('<Delete>', self.handle_delete_proj)
+        self.bind('<Return>', self.choose_proj)
+        self.bind('<Delete>', self.delete_proj)
         self.bind('<Escape>', lambda _: self.destroy())
         self.title(get_name("win_view_proj"))
         self.focus_force()
@@ -69,15 +69,15 @@ class WinViewProj(Toplevel):
         self.frame_tree.pack(fill=BOTH, expand=1)
         self.tree.pack(fill=Y, expand=1, side=LEFT)
         self.scroll_tree_y.pack(fill=Y, expand=1, side=RIGHT)
-        self.tree.bind('<Double-ButtonRelease-1>', self.handle_choose_proj)
+        self.tree.bind('<Double-ButtonRelease-1>', self.choose_proj)
 
-    def handle_choose_proj(self, _=None):
+    def choose_proj(self, _=None):
         if not self.tree.focus().isnumeric():
             return
         self.selected_proj = self.projects[int(self.tree.focus()) - 1]
         self.destroy()
 
-    def handle_delete_proj(self, _=None):
+    def delete_proj(self, _=None):
         if not self.tree.focus().isnumeric():
             return
         if messagebox.askyesno(parent=self, title=get_name("ask_conf_del_proj_title"), message=get_name("ask_conf_del_proj_text")):
