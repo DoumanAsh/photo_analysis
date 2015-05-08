@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # External modules
-import os
+from re import compile as re_compile
+from os import path as os_path
+from os import walk as os_walk
+from os import listdir
 from datetime import datetime
 from tkinter import *
 from tkinter import filedialog, messagebox, font
@@ -197,7 +200,7 @@ class WinMain():
         try:
             # Create window from class and save pointer
             self.win_photo_an = WinPhotoAn(master=self.master,
-                                           path=os.path.split(self.project_file)[0],
+                                           path=os_path.split(self.project_file)[0],
                                            project_keywords=self.project_dict["keywords"])
 
         # This exception will be raised if user chooses a project without photo
@@ -310,15 +313,17 @@ class WinMain():
         if not dir_with_photo:
             return
 
+        #regex to replace string.replace('-', ' ').replace('_', ' ')
+        re_replace = re_compile("[-_]")
         # Get list of files to save
         photos_for_saving_with_date = {}
         photos_for_saving_without_date = []
-        for root, _, files in os.walk(dir_with_photo):
+        for root, _, files in os_walk(dir_with_photo):
             for file in files:
-                if os.path.splitext(file)[-1].lower() in supported_image_ext:
+                if os_path.splitext(file)[-1].lower() in supported_image_ext:
                     possible_dt = ''
                     # Try to get date/time from filename
-                    for name_part in os.path.splitext(file)[0].replace('-', ' ').replace('_', ' ').split():
+                    for name_part in re_replace.sub(os_path.splitext(file)[0], " ").split():
                         # Collect all numeric parts of filename
                         if name_part.isnumeric():
                             possible_dt = '{0}:{1}'.format(possible_dt, name_part)
@@ -329,14 +334,14 @@ class WinMain():
                     except ValueError:
                         try:
                             # Try to find date/time in metadata
-                            possible_dt = et.get_data_from_image(os.path.join(root, file),
+                            possible_dt = et.get_data_from_image(os_path.join(root, file),
                                                                  "-EXIF:DateTimeOriginal")["EXIF"]["DateTimeOriginal"]
                             dt = datetime.strptime(possible_dt, '%Y:%m:%d %H:%M:%S')
                         # If date/time were not found in metadata too
                         except KeyError:
-                            photos_for_saving_without_date.append(os.path.join(root, file))
+                            photos_for_saving_without_date.append(os_path.join(root, file))
                             continue
-                    photos_for_saving_with_date[dt.strftime('%Y-%m-%d %H:%M:%S')] = [os.path.join(root, file), None]
+                    photos_for_saving_with_date[dt.strftime('%Y-%m-%d %H:%M:%S')] = [os_path.join(root, file), None]
 
         # Get max and min dates from files which are going to be saved
         sorted_photo_dt = sorted(photos_for_saving_with_date)
@@ -345,7 +350,7 @@ class WinMain():
 
         # Collect projects which are between min and max dates
         proposed_projects = []
-        for d in os.listdir(settings["projects_dir"]):
+        for d in listdir(settings["projects_dir"]):
             dates = str(d.split('_')[0])
             if len(dates) > 11:
                 prj_start = datetime.strptime(dates[:10], '%Y-%m-%d')
@@ -354,7 +359,7 @@ class WinMain():
                 prj_start = datetime.strptime(dates, '%Y-%m-%d')
                 prj_finish = prj_start
             if prj_start >= min_date and prj_finish <= max_date:
-                proposed_projects.append(os.path.join(settings["projects_dir"], d, project_file))
+                proposed_projects.append(os_path.join(settings["projects_dir"], d, project_file))
 
         # Connect photo and project basing on date/time
         for project in proposed_projects:
@@ -374,7 +379,7 @@ class WinMain():
 
                 dt = datetime.strptime(key, '%Y-%m-%d %H:%M:%S')
                 if prj_start <= dt <= prj_finish:  # If photo date/time in project timeslot
-                    photos_for_saving_with_date[key][1] = os.path.split(project)[0]
+                    photos_for_saving_with_date[key][1] = os_path.split(project)[0]
 
     def cmd_analyse_photo(self):
         # If pointer is defined just switch focus to the window
