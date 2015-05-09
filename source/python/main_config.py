@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from os import path
 from json import load as json_load
+from re import compile as re_compile
 
 supported_ext_for_analysis = {'.jpg', '.jpeg'}
 supported_image_ext = {'.jpg', '.jpeg', '.cr2'}
+xmp_ext = '.xmp'
 
 # Interface
 language = 'ru'
@@ -37,6 +39,16 @@ with open(settings_json, encoding='utf-8') as _f:
     settings = json_load(_f)
 
 project_file = 'photo_project.json'
+
+dir_source = 'Source'
+dir_fullsize = 'Fullsize'
+dir_monitor = 'Monitor'
+dir_web = 'Web'
+dir_panorama = 'Panorama'
+dir_layered = 'Layered'
+
+# Regex to find date/time in filename basing on pattern. Don't check limits for the numbers here.
+dt_in_fn_regex = re_compile(".*(\d\d\d\d\-\d\d\-\d\d_\d\d\-\d\d\-\d\d).*")
 
 
 def get_name(name):

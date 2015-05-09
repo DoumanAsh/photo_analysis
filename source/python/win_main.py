@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # External modules
 from shutil import rmtree as delete_folder
-from re import compile as re_compile
 from os import path as os_path
 from os import walk as os_walk
 from os import listdir
@@ -184,39 +183,176 @@ class WinMain():
         folders = next(os_walk(proj_path))[1]
 
         if folders:
+            # Prepare table with statistics about folders and files
+            # ----------------------------------------------------------------------------------------------------------
             self.tree_folders = ttk.Treeview(master=self.frame_proj_stat,
-                                             columns=('Files', 'Nested folders'),
+                                             columns=('files', 'nested_folders'),
                                              height=len(folders),
                                              selectmode=NONE)
-            self.tree_folders.column('#0', stretch=False)
+            self.tree_folders.column('#0', stretch=False, width=170)
             self.tree_folders.heading('#0', text=get_name('folder'))
-            self.tree_folders.column('Files', stretch=False)
-            self.tree_folders.heading('Files', text=get_name('files'))
-            self.tree_folders.column('Nested folders', stretch=False)
-            self.tree_folders.heading('Nested folders', text=get_name('nested_folders'))
+            self.tree_folders.column('files', stretch=False, width=150)
+            self.tree_folders.heading('files', text=get_name('files'))
+            self.tree_folders.column('nested_folders', stretch=False, width=150)
+            self.tree_folders.heading('nested_folders', text=get_name('nested_folders'))
 
             for ix, folder in enumerate(folders, start=1):
                 self.tree_folders.insert('', 'end', ix, text=folder)
-                self.tree_folders.set(ix, 'Files', len(next(os_walk(os_path.join(proj_path, folder)))[2]))
-                self.tree_folders.set(ix, 'Nested folders', len(next(os_walk(os_path.join(proj_path, folder)))[1]))
+                self.tree_folders.set(ix, 'files', len(next(os_walk(os_path.join(proj_path, folder)))[2]))
+                self.tree_folders.set(ix, 'nested_folders', len(next(os_walk(os_path.join(proj_path, folder)))[1]))
+            # ==========================================================================================================
+
+            # Prepare table with statistics about photographs basing on source photographs
+            # ----------------------------------------------------------------------------------------------------------
+            self.tree_source = ttk.Treeview(master=self.frame_proj_stat,
+                                            height=10,
+                                            selectmode=NONE,
+                                            columns=("xmp", "fullsize", "monitor", "web", "panorama", "layered"))
+
+            source_files = []
+            xmp_files = []
+            xmp_files_num = 0
+            fs_files_num = 0
+            mon_files_num = 0
+            web_files_num = 0
+            pan_files_num = 0
+            layered_files_num = 0
+
+            # Regex to replace string.replace('-', ' ').replace('_', ' ')
+            re_replace = re_compile("[-_]")
+
+            for file in next(os_walk((os_path.join(proj_path, dir_source))))[2]:
+                if os_path.splitext(file)[-1].lower() in supported_image_ext:
+                    source_files.append(file)
+                if os_path.splitext(file)[-1].lower() == xmp_ext:
+                    xmp_files.append(file)
+
+            for source_file in source_files:
+                fn_without_ext = os_path.splitext(source_file)[0]
+                self.tree_source.insert('', 'end', fn_without_ext, text=source_file)
+                for file in xmp_files:
+                    if os_path.splitext(file)[0] == fn_without_ext:
+                        xmp_files_num += 1
+                        self.tree_source.set(fn_without_ext, 'xmp', '+')
+                        break
+
+                if os_path.isdir(os_path.join(proj_path, dir_fullsize)):
+                    for file in next(os_walk((os_path.join(proj_path, dir_fullsize))))[2]:
+                        found_matching = dt_in_fn_regex.match(file)
+                        if found_matching and found_matching.group(1) == fn_without_ext:
+                            fs_files_num += 1
+                            self.tree_source.set(fn_without_ext, 'fullsize', '+')
+                            break
+
+                if os_path.isdir(os_path.join(proj_path, dir_monitor)):
+                    for file in next(os_walk((os_path.join(proj_path, dir_monitor))))[2]:
+                        found_matching = dt_in_fn_regex.match(file)
+                        if found_matching and found_matching.group(1) == fn_without_ext:
+                            mon_files_num += 1
+                            self.tree_source.set(fn_without_ext, 'monitor', '+')
+                            break
+
+                if os_path.isdir(os_path.join(proj_path, dir_web)):
+                    for file in next(os_walk((os_path.join(proj_path, dir_web))))[2]:
+                        found_matching = dt_in_fn_regex.match(file)
+                        if found_matching and found_matching.group(1) == fn_without_ext:
+                            web_files_num += 1
+                            self.tree_source.set(fn_without_ext, 'web', '+')
+                            break
+
+                if os_path.isdir(os_path.join(proj_path, dir_panorama)):
+                    for file in next(os_walk((os_path.join(proj_path, dir_panorama))))[2]:
+                        found_matching = dt_in_fn_regex.match(file)
+                        if found_matching and found_matching.group(1) == fn_without_ext:
+                            pan_files_num += 1
+                            self.tree_source.set(fn_without_ext, 'panorama', '+')
+                            break
+
+                if os_path.isdir(os_path.join(proj_path, dir_layered)):
+                    for file in next(os_walk((os_path.join(proj_path, dir_layered))))[2]:
+                        found_matching = dt_in_fn_regex.match(file)
+                        if found_matching and found_matching.group(1) == fn_without_ext:
+                            layered_files_num += 1
+                            self.tree_source.set(fn_without_ext, 'layered', '+')
+                            break
+
+            text = """Statistics of source files ({0}):
+Type\t\tNum of files
+XMP:\t\t{1}\t{2}%
+Fullsize:\t\t{3}\t{4}%
+Monitor:\t\t{5}\t{6}%
+Web:\t\t{7}\t{8}%
+Panorama:\t{9}\t{10}%
+Layered:\t\t{11}\t{12}%""".format(len(source_files),
+                                  xmp_files_num,
+                                  int(xmp_files_num / len(source_files) * 100),
+                                  fs_files_num,
+                                  int(fs_files_num / len(source_files) * 100),
+                                  mon_files_num,
+                                  int(mon_files_num / len(source_files) * 100),
+                                  web_files_num,
+                                  int(web_files_num / len(source_files) * 100),
+                                  pan_files_num,
+                                  int(pan_files_num / len(source_files) * 100),
+                                  layered_files_num,
+                                  int(layered_files_num / len(source_files) * 100))
+
+            self.lbl_source_stat = ttk.Label(master=self.frame_proj_stat, text=text)
+
+            self.tree_source.heading('#0', text='Source')
+            self.tree_source.heading('xmp', text='XMP')
+            self.tree_source.heading('fullsize', text='FS')
+            self.tree_source.heading('monitor', text='Mon')
+            self.tree_source.heading('web', text='Web')
+            self.tree_source.heading('panorama', text='Pan')
+            self.tree_source.heading('layered', text='Lrd')
+
+            self.tree_source.column('#0', stretch=False, width=170)
+            self.tree_source.column('xmp', stretch=False, width=50)
+            self.tree_source.column('fullsize', stretch=False, width=50)
+            self.tree_source.column('monitor', stretch=False, width=50)
+            self.tree_source.column('web', stretch=False, width=50)
+            self.tree_source.column('panorama', stretch=False, width=50)
+            self.tree_source.column('layered', stretch=False, width=50)
 
         else:
             self.lbl_no_st_empty_prj = ttk.Label(master=self.frame_proj_stat, text=get_name("lbl_no_st_empty_prj"))
 
         self.frame_project.pack(fill=BOTH)
-        self.frame_proj_info.grid(row=0, column=0, columnspan=4, sticky=W + E + N + S)
+        self.frame_proj_info.grid(row=0, column=0, sticky=W + E + N + S)
         self.lbl_proj_info.pack(fill=X)
-        self.frame_proj_controls.grid(row=0, column=4, sticky=W + E + N + S)
+        self.frame_proj_controls.grid(row=1, column=0, sticky=W + E + N + S)
         self.btn_analyze_photo.pack(fill=X)
         self.btn_edit.pack(fill=X)
         self.btn_close_proj.pack(fill=X)
         self.btn_delete_proj.pack(fill=X)
         self.btn_refresh.pack(fill=X)
-        self.frame_proj_stat.grid(row=1, column=0, columnspan=5, sticky=W + E + N + S)
+        self.frame_proj_stat.grid(row=0, column=1, rowspan=2, sticky=W + E + N + S)
         if folders:
             self.tree_folders.pack()
+            self.lbl_source_stat.pack(fill=X)
+            self.tree_source.pack()
         else:
             self.lbl_no_st_empty_prj.pack(fill=X)
+
+    @staticmethod
+    def get_numeric_parts_of_fn(filename):
+
+        found_match = regex.match(filename)
+        if found_match:
+            print(found_match.group(1))
+        exit(0)
+        print(regex.match(filename).groups())
+        print(regex.search(filename))
+        numeric_parts = []
+        print(os_path.splitext(filename)[0])
+        normalized_fn = regex.sub(os_path.splitext(filename)[0], " ")
+        # Try to get date/time from filename
+        for name_part in normalized_fn.split():
+            # Collect all numeric parts of filename
+            if name_part.isnumeric():
+                numeric_parts.append(name_part)
+        return numeric_parts
 
     def analyze_photo_from_project(self, _=None):
         # TODO: show warning to user
@@ -344,23 +480,19 @@ class WinMain():
         if not dir_with_photo:
             return
 
-        # Regex to replace string.replace('-', ' ').replace('_', ' ')
-        re_replace = re_compile("[-_]")
         # Get list of files to save
         photos_for_saving_with_date = {}
         photos_for_saving_without_date = []
         for root, _, files in os_walk(dir_with_photo):
             for file in files:
                 if os_path.splitext(file)[-1].lower() in supported_image_ext:
-                    possible_dt = ''
-                    # Try to get date/time from filename
-                    for name_part in re_replace.sub(os_path.splitext(file)[0], " ").split():
-                        # Collect all numeric parts of filename
-                        if name_part.isnumeric():
-                            possible_dt = '{0}:{1}'.format(possible_dt, name_part)
                     try:
-                        # Try to convert collected numeric parts into datetime object
-                        dt = datetime.strptime(possible_dt, ':%Y:%m:%d:%H:%M:%S')
+                        found_matching = dt_in_fn_regex.match(file)
+                        if found_matching:
+                            # Convert collected numeric parts into datetime object
+                            dt = datetime.strptime(str(found_matching), '%Y-%m-%d_%H-%M-%S')
+                        else:
+                            raise ValueError
                     # If date/time were not found in filename
                     except ValueError:
                         try:
