@@ -13,6 +13,9 @@ class WinSettings(Toplevel):
         self.projects_dir = settings["projects_dir"]
 
         Toplevel.__init__(self, master)
+
+        self.bind('<Control-s>', lambda _: self.save_settings())
+        self.bind('<Escape>', lambda _: self.destroy())
         self.geometry("+200+200")
         self.config(background=main_bg,
                     padx=top_level_padding,

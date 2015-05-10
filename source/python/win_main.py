@@ -17,11 +17,57 @@ from win_view_proj import WinViewProj
 import exiftool as et
 
 
+class SimpleMsg(Toplevel):
+    def __init__(self, title='', message=''):
+        bg = '#6A5A55'
+        self.s = ttk.Style()
+        self.s.configure('SimpleMsg.TLabelframe', padding=0)
+        self.s.configure('SimpleMsg.TLabel', background='white')
+
+        Toplevel.__init__(self, background=bg)
+        self.geometry("+{0}+{1}".format(int(self.winfo_screenwidth() / 2 - 200),
+                                        int(self.winfo_screenheight() / 2 - 100)))
+        self.config(background=bg,
+                    padx=top_level_padding,
+                    pady=top_level_padding)
+        self.focus_force()
+        self.overrideredirect(True)
+        self.frame = ttk.LabelFrame(master=self, text=title, style='SimpleMsg.TLabelframe')
+        self.lbl = Text(master=self.frame,
+                        bg='white',
+                        font=("Cambria", 12),
+                        borderwidth=0,
+                        wrap=WORD,
+                        height=len(message.splitlines()) + 3,
+                        width=50)
+        self.lbl.insert(1.0, message)
+        self.lbl.tag_configure("center", justify='center')
+        self.lbl.tag_add("center", 1.0, 8.0)
+        self.lbl.configure(state="disabled", relief=FLAT)
+        self.btn = ttk.Button(master=self.frame, text="Ok")
+        self.btn.bind("<ButtonRelease-1>", lambda _: self.destroy())
+        self.bind("<Escape>", lambda _: self.destroy())
+        self.bind("<Return>", lambda _: self.destroy())
+        self.bind("<FocusOut>", lambda _: self.focus_force())
+        self.frame.pack(fill=BOTH)
+        self.lbl.pack(fill=BOTH)
+        self.btn.pack()
+
+
 class WinMain():
     def __init__(self, master=None):
         self.master = master
 
+        self.master.bind('<Control-o>', lambda _: self.cmd_open_project())
+        self.master.bind('<Control-q>', lambda _: self.cmd_close_project())
+        self.master.bind('<Control-n>', lambda _: self.cmd_create_project())
+        self.master.bind('<Control-v>', lambda _: self.cmd_view_proj())
+        self.master.bind('<Control-c>', lambda _: self.cmd_settings())
+        self.master.bind('<Control-s>', lambda _: self.cmd_save_photo())
+        self.master.bind('<Control-a>', lambda _: self.cmd_analyse_photo())
+        self.master.bind('<F1>', lambda _: self.cmd_help())
         self.master.bind('<Escape>', lambda _: self.master.destroy())
+
         self.is_project_under_edition = False
 
         # Initialize pointers to child windows with empty values
@@ -85,11 +131,11 @@ class WinMain():
         self.frame_welcome = ttk.Frame(master=self.master)
         self.frame_default_controls = ttk.Frame(master=self.frame_welcome)
 
-        self.btn_open_proj = ttk.Button(master=self.frame_default_controls, text=get_name("cmd_open_project"))
-        self.btn_create_proj = ttk.Button(master=self.frame_default_controls, text=get_name("cmd_create_project"))
-        self.btn_view_proj = ttk.Button(master=self.frame_default_controls, text=get_name("cmd_view_proj"))
-        self.btn_save_photo = ttk.Button(master=self.frame_default_controls, text=get_name("cmd_save_photo"))
-        self.btn_analyse_photo = ttk.Button(master=self.frame_default_controls, text=get_name("cmd_analyse_photo"))
+        self.btn_open_proj = ttk.Button(master=self.frame_default_controls, text=get_name("btn_open_project"))
+        self.btn_create_proj = ttk.Button(master=self.frame_default_controls, text=get_name("btn_create_project"))
+        self.btn_view_proj = ttk.Button(master=self.frame_default_controls, text=get_name("btn_view_proj"))
+        self.btn_save_photo = ttk.Button(master=self.frame_default_controls, text=get_name("btn_save_photo"))
+        self.btn_analyse_photo = ttk.Button(master=self.frame_default_controls, text=get_name("btn_analyse_photo"))
 
         self.btn_open_proj.bind('<ButtonRelease-1>', lambda _: self.cmd_open_project())
         self.btn_create_proj.bind('<ButtonRelease-1>', lambda _: self.cmd_create_project())
@@ -587,5 +633,5 @@ Layered:\t\t{11}\t\t\t{12}%""".format(len(source_files),
 
     @staticmethod
     def cmd_about():
-        messagebox.showinfo(get_name("win_about"), get_name("text_about"))
-
+        #messagebox.showinfo(get_name("win_about"), get_name("text_about"))
+        SimpleMsg(title=get_name("win_about"), message=get_name("text_about"))

@@ -105,6 +105,9 @@ def get_geo_tags_in_iptc_format(image):
 
     latitude = float(gps_info["latitude"][0])
     longitude = float(gps_info["longitude"][0])
+
+    trace.debug("GPS-coordinates of {0}: lat {1}; lon {2}".format(image, latitude, longitude))
+
     y_d = get_info_yandex(latitude, longitude)
     iptc_d = dict(keywords=[])
 
@@ -133,3 +136,13 @@ def get_osm_keywords(object_class, object_type):
         pass
 
     return keywords
+
+if __name__ == "__main__":
+    from sys import argv
+    res = get_geo_tags_in_iptc_format(argv[1])
+    print("Results:")
+    if res:
+        for item in res:
+            print("{0}: {1}".format(item, res[item]))
+    else:
+        print("geo-info not found")

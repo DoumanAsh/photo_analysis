@@ -124,7 +124,7 @@ class WinEpp(Toplevel):
                                                   time=self.entry_start_time.get()),
                                        finish=dict(date=self.entry_finish_date.get(),
                                                    time=self.entry_finish_time.get())),
-                         keywords=self.txt_keywords.get('1.0', END).strip().split('\n'),
+                         keywords=self.txt_keywords.get('1.0', END).strip().splitlines(),
                          description=self.txt_description.get('1.0', END).strip())
 
         # Date/time checks

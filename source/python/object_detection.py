@@ -51,3 +51,12 @@ def get_keywords(image):
                 keywords.extend(cascades[cascade]['nested_object']['keywords'])
 
     return list(set(keywords))
+
+if __name__ == "__main__":
+    from sys import argv
+    res = get_keywords(argv[1])
+    print("Keywords:")
+    if res:
+        print(res)
+    else:
+        print("n/a. Objects not found")
