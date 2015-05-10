@@ -21,6 +21,7 @@ class WinMain():
     def __init__(self, master=None):
         self.master = master
 
+        self.master.bind('<Escape>', lambda _: self.master.destroy())
         self.is_project_under_edition = False
 
         # Initialize pointers to child windows with empty values
@@ -52,7 +53,7 @@ class WinMain():
         self.menu_project.add_command(label=get_name("cmd_settings"),
                                       command=self.cmd_settings)
         self.menu_project.add_separator()
-        self.menu_project.add_command(label=get_name("cmd_exit"), command=self.master.quit)
+        self.menu_project.add_command(label=get_name("cmd_exit"), command=self.master.destroy)
 
         self.menubar.add_cascade(label=get_name("menu_project"),
                                  menu=self.menu_project)
@@ -189,11 +190,11 @@ class WinMain():
                                              columns=('files', 'nested_folders'),
                                              height=len(folders),
                                              selectmode=NONE)
-            self.tree_folders.column('#0', stretch=False, width=170)
+            self.tree_folders.column('#0', stretch=False, width=145)
             self.tree_folders.heading('#0', text=get_name('folder'))
-            self.tree_folders.column('files', stretch=False, width=150)
+            self.tree_folders.column('files', stretch=False, width=145)
             self.tree_folders.heading('files', text=get_name('files'))
-            self.tree_folders.column('nested_folders', stretch=False, width=150)
+            self.tree_folders.column('nested_folders', stretch=False, width=190)
             self.tree_folders.heading('nested_folders', text=get_name('nested_folders'))
 
             for ix, folder in enumerate(folders, start=1):
@@ -209,6 +210,9 @@ class WinMain():
                                             selectmode=NONE,
                                             columns=("xmp", "fullsize", "monitor", "web", "panorama", "layered"))
 
+            self.scroll_tree_y = ttk.Scrollbar(master=self.frame_proj_stat, orient='vertical', command=self.tree_source.yview)
+            self.tree_source.configure(yscroll=self.scroll_tree_y.set)
+
             source_files = []
             xmp_files = []
             xmp_files_num = 0
@@ -217,9 +221,6 @@ class WinMain():
             web_files_num = 0
             pan_files_num = 0
             layered_files_num = 0
-
-            # Regex to replace string.replace('-', ' ').replace('_', ' ')
-            re_replace = re_compile("[-_]")
 
             for file in next(os_walk((os_path.join(proj_path, dir_source))))[2]:
                 if os_path.splitext(file)[-1].lower() in supported_image_ext:
@@ -276,26 +277,32 @@ class WinMain():
                             self.tree_source.set(fn_without_ext, 'layered', '+')
                             break
 
-            text = """Statistics of source files ({0}):
-Type\t\tNum of files
-XMP:\t\t{1}\t{2}%
-Fullsize:\t\t{3}\t{4}%
-Monitor:\t\t{5}\t{6}%
-Web:\t\t{7}\t{8}%
-Panorama:\t{9}\t{10}%
-Layered:\t\t{11}\t{12}%""".format(len(source_files),
-                                  xmp_files_num,
-                                  int(xmp_files_num / len(source_files) * 100),
-                                  fs_files_num,
-                                  int(fs_files_num / len(source_files) * 100),
-                                  mon_files_num,
-                                  int(mon_files_num / len(source_files) * 100),
-                                  web_files_num,
-                                  int(web_files_num / len(source_files) * 100),
-                                  pan_files_num,
-                                  int(pan_files_num / len(source_files) * 100),
-                                  layered_files_num,
-                                  int(layered_files_num / len(source_files) * 100))
+            text = """{13}
+({14} - {0}):
+{15}\t\t{16}\t{17}
+XMP:\t\t{1}\t\t\t{2}%
+Fullsize:\t\t{3}\t\t\t{4}%
+Monitor:\t\t{5}\t\t\t{6}%
+Web:\t\t{7}\t\t\t{8}%
+Panorama:\t{9}\t\t\t{10}%
+Layered:\t\t{11}\t\t\t{12}%""".format(len(source_files),
+                                      xmp_files_num,
+                                      int(xmp_files_num / len(source_files) * 100),
+                                      fs_files_num,
+                                      int(fs_files_num / len(source_files) * 100),
+                                      mon_files_num,
+                                      int(mon_files_num / len(source_files) * 100),
+                                      web_files_num,
+                                      int(web_files_num / len(source_files) * 100),
+                                      pan_files_num,
+                                      int(pan_files_num / len(source_files) * 100),
+                                      layered_files_num,
+                                      int(layered_files_num / len(source_files) * 100),
+                                      get_name("stat_of_edited"),
+                                      get_name("source_files"),
+                                      get_name("type"),
+                                      get_name("num_of_files"),
+                                      get_name("percent_from_source"))
 
             self.lbl_source_stat = ttk.Label(master=self.frame_proj_stat, text=text)
 
@@ -331,7 +338,8 @@ Layered:\t\t{11}\t{12}%""".format(len(source_files),
         if folders:
             self.tree_folders.pack()
             self.lbl_source_stat.pack(fill=X)
-            self.tree_source.pack()
+            self.tree_source.pack(side=LEFT)
+            self.scroll_tree_y.pack(side=RIGHT, fill=Y, expand=1)
         else:
             self.lbl_no_st_empty_prj.pack(fill=X)
 

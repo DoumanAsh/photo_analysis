@@ -302,5 +302,7 @@ class WinPhotoAn(Toplevel):
 
                 self.ch_btn_kw[-1].grid(row=len(self.ch_btn_kw) - 1, column=0, sticky=W)
 
-    def save(self, ev=None):
+    def save(self, _=None):
+        global language
+        language = 'ru'
         pass

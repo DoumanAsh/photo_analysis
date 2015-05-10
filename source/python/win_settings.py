@@ -103,7 +103,7 @@ class WinSettings(Toplevel):
         settings['photo_an']['obj_detect_an'] = self.ch_btn_obj_detect_an_value.get()
         settings['photo_an']['project_an'] = self.ch_btn_project_an_value.get()
         with open(settings_json, 'w', encoding='utf-8') as f:
-            json_dump(settings, f)
+            json_dump(settings, f, sort_keys=True, indent=2)
         self.destroy()
 
     def close(self, _=None):

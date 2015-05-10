@@ -16,6 +16,7 @@ class WinEpp(Toplevel):
         self.project_file = None
 
         Toplevel.__init__(self, master)
+        self.bind('<Escape>', lambda _: self.destroy())
         self.title(get_name("win_epp"))
         self.focus_force()
         self.geometry("+200+200")

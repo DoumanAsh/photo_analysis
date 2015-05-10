@@ -1,1 +1,10 @@
-{"projects_dir": "D:/Photo_projects", "photo_an": {"project_an": "True", "geo_an": "True", "preview_size": 500, "obj_detect_an": "True"}}
+{
+  "language": "ru",
+  "photo_an": {
+    "geo_an": "True",
+    "obj_detect_an": "True",
+    "preview_size": 750,
+    "project_an": "True"
+  },
+  "projects_dir": "D:/Photo_projects"
+}

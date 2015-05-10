@@ -8,7 +8,6 @@ supported_image_ext = {'.jpg', '.jpeg', '.cr2'}
 xmp_ext = '.xmp'
 
 # Interface
-language = 'ru'
 top_level_padding = 5
 min_preview_size = 150
 max_preview_size = 750
@@ -37,7 +36,7 @@ with open('json/name_dictionary.json', encoding='utf-8') as _f:
 
 with open(settings_json, encoding='utf-8') as _f:
     settings = json_load(_f)
-
+language = settings['language']
 project_file = 'photo_project.json'
 
 dir_source = 'Source'
