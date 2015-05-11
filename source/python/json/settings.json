@@ -3,8 +3,8 @@
   "photo_an": {
     "geo_an": "True",
     "obj_detect_an": "True",
-    "preview_size": 750,
+    "preview_size": 500,
     "project_an": "True"
   },
-  "projects_dir": "D:/Photo_projects"
+  "projects_dir": "./demo_photo_projects"
 }

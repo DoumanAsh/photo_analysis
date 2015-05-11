@@ -11,14 +11,15 @@ xmp_ext = '.xmp'
 top_level_padding = 5
 min_preview_size = 150
 max_preview_size = 750
-main_bg = '#BBBBBB'
+main_bg = '#DCDCDC'
 main_fg = '#000000'
-btn_bg = '#DDDDDD'
+btn_bg = '#FFFFFF'
 btn_fg = '#000000'
 canvas_bg = '#222222'
 
 # External binary tools
 exiftool = path.abspath('bin/exiftool.exe')
+iptc_address_tags = {"Country-PrimaryLocationName", "Province-State", "City", "Sub-location"}
 # FIXME: change path, when you are ready
 object_detector = path.abspath('D:/Studies/_Graduation_thesis/Programming/C++/object_detection/Debug/object_detection.exe')
 

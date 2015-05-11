@@ -6,7 +6,7 @@ traces = dict(
     error=True,
     warning=True,
     info=True,
-    debug=True,
+    debug=False,
     enter=False)
 
 

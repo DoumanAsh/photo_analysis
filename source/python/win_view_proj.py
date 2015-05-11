@@ -81,7 +81,7 @@ class WinViewProj(Toplevel):
         if not self.tree.focus().isnumeric():
             return
         if messagebox.askyesno(parent=self, title=get_name("ask_conf_del_proj_title"), message=get_name("ask_conf_del_proj_text")):
-            delete_folder(path=os.path.split(self.projects[int(self.tree.focus()) - 1])[0])
+            delete_folder(path=os_path.split(self.projects[int(self.tree.focus()) - 1])[0])
             for child in self.winfo_children():
                 child.destroy()
             self.projects = []

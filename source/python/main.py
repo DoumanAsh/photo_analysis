@@ -20,7 +20,7 @@ if __name__ == "__main__":
                 padx=top_level_padding,
                 pady=top_level_padding)
     style = ttk.Style()
-    style.theme_use('clam')
+    style.theme_use('xpnative')
     style.configure(style=".",
                     background=main_bg,
                     foreground=main_fg,

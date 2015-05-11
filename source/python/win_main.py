@@ -19,17 +19,16 @@ import exiftool as et
 
 class SimpleMsg(Toplevel):
     def __init__(self, title='', message=''):
-        bg = '#6A5A55'
+        bg = '#333'
         self.s = ttk.Style()
         self.s.configure('SimpleMsg.TLabelframe', padding=0)
         self.s.configure('SimpleMsg.TLabel', background='white')
 
         Toplevel.__init__(self, background=bg)
-        self.geometry("+{0}+{1}".format(int(self.winfo_screenwidth() / 2 - 200),
-                                        int(self.winfo_screenheight() / 2 - 100)))
+        self.geometry("+250+125")
         self.config(background=bg,
-                    padx=top_level_padding,
-                    pady=top_level_padding)
+                    padx=2,
+                    pady=2)
         self.focus_force()
         self.overrideredirect(True)
         self.frame = ttk.LabelFrame(master=self, text=title, style='SimpleMsg.TLabelframe')
@@ -38,7 +37,7 @@ class SimpleMsg(Toplevel):
                         font=("Cambria", 12),
                         borderwidth=0,
                         wrap=WORD,
-                        height=len(message.splitlines()) + 3,
+                        height=len(message.splitlines()) + 4,
                         width=50)
         self.lbl.insert(1.0, message)
         self.lbl.tag_configure("center", justify='center')

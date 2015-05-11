@@ -10,6 +10,7 @@ from PIL import Image, ImageTk
 from main_config import *
 import geo_tags
 import object_detection
+import exiftool as et
 
 
 class CanvasWithImage(Canvas):
@@ -65,6 +66,12 @@ class WinPhotoAn(Toplevel):
         self.photo_for_analysis = []
         self.project_keywords = project_keywords
         self.master = master
+
+        # Dictionary to combine results of all analysis types together
+        self.results = {}
+
+        self.ch_btn_addr_values = {}
+        self.ch_btn_kw_values = {}
 
         # Collect all photos (with allowed extensions) with paths
         for top, _, files in os_walk(path):
@@ -152,17 +159,46 @@ class WinPhotoAn(Toplevel):
         self.btn_save.bind('<ButtonRelease-1>', self.save)
 
         self.frame_results = ttk.Frame(master=self.frame_main, padding=5)
-
+        self.lbl_saved_iptc = ttk.Label(master=self.frame_main, text=self.get_formatted_saved_iptc())
         self.canvas_with_img.pack(fill=BOTH, side=LEFT)
         self.frame_main.pack(fill=BOTH, side=LEFT)
-        self.frame_controls.pack(fill=X)
+        self.frame_controls.grid(row=0, column=0, sticky=W + E, columnspan=2)
         self.frame_analysis_type.pack(fill=X)
         self.ch_btn_geo_an.grid(sticky=W, row=0, column=0)
-        self.ch_btn_obj_detect_an.grid(sticky=W, row=1, column=0)
-        self.ch_btn_project_an.grid(sticky=W, row=2, column=0)
+        self.ch_btn_obj_detect_an.grid(sticky=W, row=0, column=1)
+        self.ch_btn_project_an.grid(sticky=W, row=0, column=2)
         self.btn_analyze.pack(side=LEFT, fill=X)
         self.btn_save.pack(side=LEFT, fill=X)
-        self.frame_results.pack(fill=X)
+        self.frame_results.grid(row=1, column=0, sticky=N)
+        self.lbl_saved_iptc.grid(row=1, column=1, sticky=N)
+
+    def get_formatted_saved_iptc(self):
+        photo = self.photo_for_analysis[self.current_photo_ix]
+        saved_address_info = []
+        saved_keywords = []
+        try:
+            for key, item in et.get_data_from_image(image=photo, option="-iptc:all")["IPTC"].items():
+                if key == "Keywords":
+                    # Exiftool can return list of keywords or one keyword as string
+                    # We should convert this string to list
+                    if type(item) is str:
+                        saved_keywords.append(item)
+                    else:
+                        saved_keywords = item
+                elif key in iptc_address_tags:
+                    saved_address_info.append(item)
+        except KeyError:
+            pass
+
+        return """{0}
+  {1}:
+    {2}
+  {3}:
+    {4}""".format(get_name("saved_iptc_tags"),
+                     get_name("address_info"),
+                     "\n    ".join(saved_address_info) if saved_address_info else get_name("empty"),
+                     get_name("keywords"),
+                     "\n    ".join(saved_keywords) if saved_keywords else get_name("empty"))
 
     def next_photo(self, ev):
         if len(self.photo_for_analysis) == 1:
@@ -184,7 +220,13 @@ class WinPhotoAn(Toplevel):
         # Recreate frame with results to clean up previous data
         self.frame_results.destroy()
         self.frame_results = ttk.Frame(master=self.frame_main, padding=5)
-        self.frame_results.pack(fill=X)
+        self.frame_results.grid(row=1, column=0)
+        self.lbl_saved_iptc.config(text=self.get_formatted_saved_iptc())
+        # Dictionary to combine results of all analysis types together
+        self.results = {}
+
+        self.ch_btn_addr_values = {}
+        self.ch_btn_kw_values = {}
 
     def show_msg(self, text=''):
         bg = '#FFF8DC'
@@ -210,32 +252,35 @@ class WinPhotoAn(Toplevel):
     # ------------------------------------------------------------------------------------------------------------------
     def ch_btn_address_handler(self):
         for var in self.ch_btn_addr_values:
-            var.set(self.ch_btn_address_info_value.get())
+            self.ch_btn_addr_values[var].set(self.ch_btn_address_info_value.get())
 
     def ch_btn_keywords_handler(self):
         for var in self.ch_btn_kw_values:
-            var.set(self.ch_btn_keywords_value.get())
+            self.ch_btn_kw_values[var].set(self.ch_btn_keywords_value.get())
     # ==================================================================================================================
 
     def analyze(self, _=None):
         # Recreate frame with results to clean up previous data
         self.frame_results.destroy()
         self.frame_results = ttk.Frame(master=self.frame_main, padding=5)
-        self.frame_results.pack(fill=X)
-
+        self.frame_results.grid(row=1, column=0)
         # Dictionary to combine results of all analysis types together
-        results = {}
+        self.results = {}
+
+        self.ch_btn_addr_values = {}
+        self.ch_btn_kw_values = {}
+
+        photo = self.photo_for_analysis[self.current_photo_ix]
 
         if self.ch_btn_geo_an_value.get() == "True":
             msg = self.show_msg(get_name("msg_run_geo_an"))
-
             # Get results of geo-analysis
-            results.update(geo_tags.get_geo_tags_in_iptc_format(self.photo_for_analysis[self.current_photo_ix]))
+            self.results.update(geo_tags.get_geo_tags_in_iptc_format(photo))
 
             msg.destroy()
 
             # Display header for address info only if we have found address (have got non-empty result)
-            if results:
+            if self.results:
                 self.ch_btn_address_info_value = StringVar()
                 self.ch_btn_address_info_value.set(1)
                 self.ch_btn_address_info = ttk.Checkbutton(master=self.frame_results,
@@ -247,16 +292,15 @@ class WinPhotoAn(Toplevel):
                 self.frame_address_info.pack(fill=X)
 
                 self.ch_btn_addr = []
-                self.ch_btn_addr_values = []
-                for name in sorted(results):
+                for name in sorted(self.results):
                     # Skip keywords here, they will be displayed later
                     if name == "keywords":
                         continue
-                    self.ch_btn_addr_values.append(StringVar())
-                    self.ch_btn_addr_values[-1].set(1)
+                    self.ch_btn_addr_values[name] = StringVar()
+                    self.ch_btn_addr_values[name].set(1)
                     self.ch_btn_addr.append(ttk.Checkbutton(master=self.frame_address_info,
-                                                            text=results[name],
-                                                            variable=self.ch_btn_addr_values[-1]))
+                                                            text=self.results[name],
+                                                            variable=self.ch_btn_addr_values[name]))
 
                     self.ch_btn_addr[-1].grid(row=len(self.ch_btn_addr) - 1, column=0, sticky=W)
 
@@ -264,22 +308,22 @@ class WinPhotoAn(Toplevel):
             msg = self.show_msg(get_name("msg_run_obj_detect_an"))
 
             # Get results of object detection
-            if "keywords" in results:
-                results["keywords"].extend(object_detection.get_keywords(self.photo_for_analysis[self.current_photo_ix]))
+            if "keywords" in self.results:
+                self.results["keywords"].extend(object_detection.get_keywords(photo))
             else:
-                results["keywords"] = object_detection.get_keywords(self.photo_for_analysis[self.current_photo_ix])
+                self.results["keywords"] = object_detection.get_keywords(photo)
 
             msg.destroy()
 
         if self.ch_btn_project_an_value.get() == "True" and self.project_keywords is not None:
-            if "keywords" in results:
-                results["keywords"].extend(self.project_keywords)
+            if "keywords" in self.results:
+                self.results["keywords"].extend(self.project_keywords)
             else:
-                results["keywords"] = self.project_keywords
+                self.results["keywords"] = self.project_keywords
 
         # If we have key "keywords" and keywords list is not empty
-        if "keywords" in results and results["keywords"]:
-            results["keywords"] = list(set(results["keywords"]))
+        if "keywords" in self.results and self.results["keywords"]:
+            self.results["keywords"] = list(set(self.results["keywords"]))
             self.ch_btn_keywords_value = StringVar()
             self.ch_btn_keywords_value.set(1)
             self.ch_btn_keywords = ttk.Checkbutton(master=self.frame_results,
@@ -291,18 +335,32 @@ class WinPhotoAn(Toplevel):
             self.frame_keywords.pack(fill=X)
 
             self.ch_btn_kw = []
-            self.ch_btn_kw_values = []
 
-            for kw in results["keywords"]:
-                self.ch_btn_kw_values.append(StringVar())
-                self.ch_btn_kw_values[-1].set(1)
+            for kw in self.results["keywords"]:
+                self.ch_btn_kw_values[kw] = StringVar()
+                self.ch_btn_kw_values[kw].set(1)
                 self.ch_btn_kw.append(ttk.Checkbutton(master=self.frame_keywords,
                                                       text=kw,
-                                                      variable=self.ch_btn_kw_values[-1]))
+                                                      variable=self.ch_btn_kw_values[kw]))
 
                 self.ch_btn_kw[-1].grid(row=len(self.ch_btn_kw) - 1, column=0, sticky=W)
 
     def save(self, _=None):
-        global language
-        language = 'ru'
-        pass
+        final_tags = {}
+        final_kw = []
+        for tag in self.results:
+            if tag == "keywords":
+                for kw in self.results["keywords"]:
+                    if self.ch_btn_kw_values[kw].get() == '1':
+                        final_kw.append(kw)
+            else:
+                if self.ch_btn_addr_values[tag].get() == '1':
+                    final_tags[tag] = self.results[tag]
+
+        photo = self.photo_for_analysis[self.current_photo_ix]
+
+        if final_kw:
+            final_tags["keywords"] = final_kw
+        et.write_iptc_tags_to_image(photo, final_tags)
+        self.lbl_saved_iptc.config(text=self.get_formatted_saved_iptc())
+
