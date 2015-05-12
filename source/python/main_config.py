@@ -46,6 +46,7 @@ dir_monitor = 'Monitor'
 dir_web = 'Web'
 dir_panorama = 'Panorama'
 dir_layered = 'Layered'
+dir_unsorted = '_unsorted'
 
 # Regex to find date/time in filename basing on pattern. Don't check limits for the numbers here.
 dt_in_fn_regex = re_compile(".*(\d\d\d\d\-\d\d\-\d\d_\d\d\-\d\d\-\d\d).*")

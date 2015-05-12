@@ -6,7 +6,7 @@ traces = dict(
     error=True,
     warning=True,
     info=True,
-    debug=False,
+    debug=True,
     enter=False)
 
 
@@ -54,4 +54,5 @@ def warning(text):
         return
     stack = extract_stack()
     full_file_name_name, line, func_name, _ = stack[-2]
-    print("Enter: to function={0} [{1}:{2}]".format(func_name, path.basename(full_file_name_name), line))
+    print("Warning: {0} [{1}:{2}]".format(text, path.basename(full_file_name_name), line))
+

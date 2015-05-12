@@ -6,5 +6,10 @@
     "preview_size": 500,
     "project_an": "True"
   },
-  "projects_dir": "./demo_photo_projects"
+  "projects_dir": "D:\\Photo_projects",
+  "save_photo": {
+    "check_unsorted": "True",
+    "save_originals": "False",
+    "replace_existing_files": "False"
+  }
 }

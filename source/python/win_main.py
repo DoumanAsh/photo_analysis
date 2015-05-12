@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 # External modules
 from shutil import rmtree as delete_folder
+from shutil import copy2 as shutil_copy2
+from shutil import move as shutil_move
+from shutil import Error as shutil_Error
 from os import path as os_path
 from os import walk as os_walk
 from os import listdir
+from os import remove as os_remove
 from datetime import datetime
 from tkinter import *
 from tkinter import filedialog, messagebox, font
@@ -15,6 +19,7 @@ from win_epp import WinEpp
 from win_settings import WinSettings
 from win_view_proj import WinViewProj
 import exiftool as et
+import tracer as trace
 
 
 class SimpleMsg(Toplevel):
@@ -532,54 +537,60 @@ Layered:\t\t{11}\t\t\t{12}%""".format(len(source_files),
         dir_with_photo = filedialog.askdirectory(parent=self.master, title=get_name("dia_save_photo"), initialdir='/')
         if not dir_with_photo:
             return
+        if settings["save_photo"]["save_originals"] == "True":
+            file_operation = shutil_copy2
+        else:
+            file_operation = shutil_move
 
         # Get list of files to save
-        photos_for_saving_with_date = {}
-        photos_for_saving_without_date = []
+        pho_for_saving_without_date = []
+        ph_for_saving_with_date = []
+
+        if settings["save_photo"]["check_unsorted"] == "True":
+            # Check unsorted files
+            files = next(os_walk(os_path.join(settings["projects_dir"], dir_unsorted)))[2]
+            for file in files:
+                if os_path.splitext(file)[-1].lower() in supported_image_ext:
+                        found_matching = dt_in_fn_regex.match(file)
+                        if found_matching:
+                            try:
+                                # Convert collected numeric parts into datetime object
+                                ph_for_saving_with_date.append([os_path.join(settings["projects_dir"],
+                                                                             dir_unsorted,
+                                                                             file),
+                                                                datetime.strptime(str(found_matching.group(1)),
+                                                                                  '%Y-%m-%d_%H-%M-%S'),
+                                                                None])
+                            except ValueError:
+                                continue
+
         for root, _, files in os_walk(dir_with_photo):
             for file in files:
                 if os_path.splitext(file)[-1].lower() in supported_image_ext:
                     try:
-                        found_matching = dt_in_fn_regex.match(file)
-                        if found_matching:
-                            # Convert collected numeric parts into datetime object
-                            dt = datetime.strptime(str(found_matching), '%Y-%m-%d_%H-%M-%S')
-                        else:
-                            raise ValueError
-                    # If date/time were not found in filename
+                        # Try to find date/time in metadata
+                        possible_dt = et.get_data_from_image(os_path.join(root, file),
+                                                             "-EXIF:DateTimeOriginal")["EXIF"]["DateTimeOriginal"]
+                        # Convert collected numeric parts into datetime object
+                        ph_for_saving_with_date.append([os_path.join(root,
+                                                                     file),
+                                                        datetime.strptime(possible_dt,
+                                                                          '%Y:%m:%d %H:%M:%S'),
+                                                        None])
+                    # If date/time were not found in metadata too
                     except ValueError:
-                        try:
-                            # Try to find date/time in metadata
-                            possible_dt = et.get_data_from_image(os_path.join(root, file),
-                                                                 "-EXIF:DateTimeOriginal")["EXIF"]["DateTimeOriginal"]
-                            dt = datetime.strptime(possible_dt, '%Y:%m:%d %H:%M:%S')
-                        # If date/time were not found in metadata too
-                        except KeyError:
-                            photos_for_saving_without_date.append(os_path.join(root, file))
-                            continue
-                    photos_for_saving_with_date[dt.strftime('%Y-%m-%d %H:%M:%S')] = [os_path.join(root, file), None]
-
-        # Get max and min dates from files which are going to be saved
-        sorted_photo_dt = sorted(photos_for_saving_with_date)
-        min_date = datetime.strptime(sorted_photo_dt[0].split()[0], '%Y-%m-%d')
-        max_date = datetime.strptime(sorted_photo_dt[-1].split()[0], '%Y-%m-%d')
-
-        # Collect projects which are between min and max dates
-        proposed_projects = []
-        for d in listdir(settings["projects_dir"]):
-            dates = str(d.split('_')[0])
-            if len(dates) > 11:
-                prj_start = datetime.strptime(dates[:10], '%Y-%m-%d')
-                prj_finish = datetime.strptime(dates[11:], '%Y-%m-%d')
-            else:
-                prj_start = datetime.strptime(dates, '%Y-%m-%d')
-                prj_finish = prj_start
-            if prj_start >= min_date and prj_finish <= max_date:
-                proposed_projects.append(os_path.join(settings["projects_dir"], d, project_file))
+                        pho_for_saving_without_date.append(os_path.join(root, file))
+                        continue
 
         # Connect photo and project basing on date/time
-        for project in proposed_projects:
-            with open(project, encoding='utf-8') as _f:
+        for project in next(os_walk(settings["projects_dir"]))[1]:
+            if not os_path.isfile(os_path.join(settings["projects_dir"], project, project_file)):
+                continue
+
+            with open(os_path.join(os_path.join(settings["projects_dir"]),
+                                   project,
+                                   project_file),
+                      encoding='utf-8') as _f:
                 pd = json_load(_f)
 
             # Parse project timeslot
@@ -588,14 +599,29 @@ Layered:\t\t{11}\t\t\t{12}%""".format(len(source_files),
             prj_finish = '{0} {1}'.format(pd["timeslot"]["finish"]["date"], pd["timeslot"]["finish"]["time"])
             prj_finish = datetime.strptime(prj_finish, "%d.%m.%Y %H:%M")
 
-            for key in photos_for_saving_with_date:
-                # Skip photo, if project is already assigned to this photo
-                if photos_for_saving_with_date[key][1] is not None:
+            for ph in ph_for_saving_with_date:
+                if ph[2] is not None:
                     continue
 
-                dt = datetime.strptime(key, '%Y-%m-%d %H:%M:%S')
-                if prj_start <= dt <= prj_finish:  # If photo date/time in project timeslot
-                    photos_for_saving_with_date[key][1] = os_path.split(project)[0]
+                if prj_start <= ph[1] <= prj_finish:  # If photo date/time in project timeslot
+                    ph[2] = os_path.join(settings["projects_dir"], project, dir_source)
+
+        for ph in ph_for_saving_with_date:
+            dest_dir = os_path.normpath(ph[2]) if ph[2] is not None else os_path.join(settings["projects_dir"],
+                                                                                      dir_unsorted)
+            # TODO: file renaming according to template YYYY-MM-DD_HH-MM-SS.ext
+            if os_path.split(ph[0])[0] == dest_dir:
+                trace.debug("Try to move photo to the same location: {0}".format(ph[0]))
+            else:
+                trace.debug("Save photo: {0} -> {1}".format(os_path.normpath(ph[0]), dest_dir))
+                try:
+                    # Copy/move image
+                    file_operation(os_path.normpath(ph[0]), dest_dir)
+                    # Copy/move XMP file too if it exists
+                    if os_path.isfile(os_path.splitext(ph[0])[0] + xmp_ext):
+                        file_operation(os_path.splitext(ph[0])[0] + xmp_ext, dest_dir)
+                except shutil_Error as e:  # For example, if file already exists in destination directory
+                    trace.warning(e)
 
     def cmd_analyse_photo(self):
         # If pointer is defined just switch focus to the window
