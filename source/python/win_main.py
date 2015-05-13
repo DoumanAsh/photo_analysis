@@ -22,7 +22,7 @@ import exiftool as et
 import tracer as trace
 
 
-class SimpleMsg(Toplevel):
+class WinAbout(Toplevel):
     def __init__(self, title='', message=''):
         bg = '#333'
         self.s = ttk.Style()
@@ -56,6 +56,34 @@ class SimpleMsg(Toplevel):
         self.frame.pack(fill=BOTH)
         self.lbl.pack(fill=BOTH)
         self.btn.pack()
+
+
+class WinHelp(Toplevel):
+    def __init__(self, title=''):
+        Toplevel.__init__(self)
+
+        self.bind("<Escape>", lambda _: self.destroy())
+        self.bind("<Return>", lambda _: self.destroy())
+
+        self.title(title)
+        self.geometry("500x{0}+{1}+0".format(self.winfo_screenheight() - 100,
+                                             self.winfo_screenwidth() - 520))
+        self.focus_force()
+        self.frame = ttk.Frame(self)
+        self.txt = Text(master=self.frame,
+                        bg='white',
+                        font=("Cambria", 12),
+                        borderwidth=0,
+                        wrap=WORD)
+        self.scroll_y = ttk.Scrollbar(master=self.frame, orient=VERTICAL, command=self.txt.yview)
+        self.txt.configure(yscrollcommand=self.scroll_y.set)
+        with open(readme, encoding='utf-8') as f:
+            self.txt.insert(1.0, f.read())
+
+        self.txt.configure(state="disabled", relief=FLAT)
+        self.frame.pack(fill=BOTH, expand=1)
+        self.scroll_y.pack(side=RIGHT, fill=Y)
+        self.txt.pack(side=LEFT, fill=BOTH, expand=1)
 
 
 class WinMain():
@@ -654,9 +682,10 @@ Layered:\t\t{11}\t\t\t{12}%""".format(len(source_files),
 
     @staticmethod
     def cmd_help():
-        messagebox.showinfo(get_name("win_help"), get_name("text_help"))
+        #messagebox.showinfo(get_name("win_help"), get_name("text_help"))
+        WinHelp(title=get_name("win_help"))
 
     @staticmethod
     def cmd_about():
         #messagebox.showinfo(get_name("win_about"), get_name("text_about"))
-        SimpleMsg(title=get_name("win_about"), message=get_name("text_about"))
+        WinAbout(title=get_name("win_about"), message=get_name("text_about"))

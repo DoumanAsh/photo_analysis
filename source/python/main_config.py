@@ -40,6 +40,8 @@ with open(settings_json, encoding='utf-8') as _f:
 language = settings['language']
 project_file = 'photo_project.json'
 
+readme = "readme.txt"
+
 dir_source = 'Source'
 dir_fullsize = 'Fullsize'
 dir_monitor = 'Monitor'
