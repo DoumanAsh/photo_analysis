@@ -1,15 +1,15 @@
-import json
-import exiftool as et
+import os
+import object_detection
 
-iptc_address_tags = {"Country-PrimaryLocationName", "Province-State", "City", "Sub-location"}
-photo = "D:/test_image.jpg"
-iptc = et.get_data_from_image(photo, "-iptc:all")["IPTC"]
-address = []
-keywords = []
-for key, item in iptc.items():
-    if key == "Keywords":
-        keywords.extend(item)
-    elif key in iptc_address_tags:
-        address.append(item)
-print(keywords)
-print(address)
+path = "D:\_test\control_set_01_02_positive"
+
+number_of_images = 0
+detected = 0
+
+for file in os.listdir(path):
+    with open("test_res.txt", "w") as f:
+        number_of_images += 1
+        if "люди" in object_detection.get_keywords(os.path.join(path, file)):
+            detected += 1
+        print("{0} % detected ({1} from {2})".format(int(detected/number_of_images*1000)/10, detected, number_of_images))
+        f.write("{0}\t{1}\t{2}\n".format(int(detected/number_of_images*1000)/10, detected, number_of_images))

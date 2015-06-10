@@ -56,7 +56,7 @@
   "ask_project_file":    {"en": "Choose photo-project file",  "ru": "Выберите файл фотопроекта"},
 
   "win_settings":         {"en": "Settings",             "ru": "Настройки"},
-  "frame_photo_an":       {"en": "Photo analyzer",       "ru": "Фотоанализотор"},
+  "frame_photo_an":       {"en": "Photo analyzer",       "ru": "Фотоанализатор"},
   "lbl_preview_size":     {"en": "Preview size: ",       "ru": "Размер предпросмотра: "},
   "frame_analysis_type":  {"en": "Type of analysis",     "ru": "Тип анализа"},
   "ch_btn_geo_an":        {"en": "Geo-analysis (GPS)" ,  "ru": "Геоанализ (GPS)"},

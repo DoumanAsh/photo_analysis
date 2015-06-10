@@ -1,0 +1,42 @@
+# -*- coding: utf-8 -*-
+name = "suite_03"
+
+test_cases = {
+#                                          Use    Keyword   ScaleF MinNeigh Flag MinX  MinY  MaxX MaxY
+"01": {'haarcascade_frontalface_alt.xml': [True, '_person', '1.2', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_fullbody.xml'       : [True, '_person', '1.2', '10',     '0', '30', '60', '0', '0'],
+       'haarcascade_profileface.xml'    : [True, '_person', '1.2', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_upperbody.xml'      : [True, '_person', '1.2', '10',     '0', '40', '60', '0', '0']},
+"02": {'haarcascade_frontalface_alt.xml': [True, '_person', '1.3', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_fullbody.xml'       : [True, '_person', '1.3', '10',     '0', '30', '60', '0', '0'],
+       'haarcascade_profileface.xml'    : [True, '_person', '1.3', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_upperbody.xml'      : [True, '_person', '1.3', '10',     '0', '40', '60', '0', '0']},
+"03": {'haarcascade_frontalface_alt.xml': [True, '_person', '1.4', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_fullbody.xml'       : [True, '_person', '1.4', '10',     '0', '30', '60', '0', '0'],
+       'haarcascade_profileface.xml'    : [True, '_person', '1.4', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_upperbody.xml'      : [True, '_person', '1.4', '10',     '0', '40', '60', '0', '0']},
+"04": {'haarcascade_frontalface_alt.xml': [True, '_person', '1.5', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_fullbody.xml'       : [True, '_person', '1.5', '10',     '0', '30', '60', '0', '0'],
+       'haarcascade_profileface.xml'    : [True, '_person', '1.5', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_upperbody.xml'      : [True, '_person', '1.5', '10',     '0', '40', '60', '0', '0']},
+"05": {'haarcascade_frontalface_alt.xml': [True, '_person', '1.6', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_fullbody.xml'       : [True, '_person', '1.6', '10',     '0', '30', '60', '0', '0'],
+       'haarcascade_profileface.xml'    : [True, '_person', '1.6', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_upperbody.xml'      : [True, '_person', '1.6', '10',     '0', '40', '60', '0', '0']},
+"06": {'haarcascade_frontalface_alt.xml': [True, '_person', '1.7', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_fullbody.xml'       : [True, '_person', '1.7', '10',     '0', '30', '60', '0', '0'],
+       'haarcascade_profileface.xml'    : [True, '_person', '1.7', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_upperbody.xml'      : [True, '_person', '1.7', '10',     '0', '40', '60', '0', '0']},
+"07": {'haarcascade_frontalface_alt.xml': [True, '_person', '1.8', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_fullbody.xml'       : [True, '_person', '1.8', '10',     '0', '30', '60', '0', '0'],
+       'haarcascade_profileface.xml'    : [True, '_person', '1.8', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_upperbody.xml'      : [True, '_person', '1.8', '10',     '0', '40', '60', '0', '0']},
+"08": {'haarcascade_frontalface_alt.xml': [True, '_person', '1.9', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_fullbody.xml'       : [True, '_person', '1.9', '10',     '0', '30', '60', '0', '0'],
+       'haarcascade_profileface.xml'    : [True, '_person', '1.9', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_upperbody.xml'      : [True, '_person', '1.9', '10',     '0', '40', '60', '0', '0']},
+"09": {'haarcascade_frontalface_alt.xml': [True, '_person', '2.0', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_fullbody.xml'       : [True, '_person', '2.0', '10',     '0', '30', '60', '0', '0'],
+       'haarcascade_profileface.xml'    : [True, '_person', '2.0', '10',     '0', '40', '40', '0', '0'],
+       'haarcascade_upperbody.xml'      : [True, '_person', '2.0', '10',     '0', '40', '60', '0', '0']}
+}
