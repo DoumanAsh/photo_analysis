@@ -6,8 +6,8 @@ path = "D:\_test\control_set_01_02_positive"
 number_of_images = 0
 detected = 0
 
-for file in os.listdir(path):
-    with open("test_res.txt", "w") as f:
+with open("test_res_pos.txt", "w") as f:
+    for file in os.listdir(path):
         number_of_images += 1
         if "люди" in object_detection.get_keywords(os.path.join(path, file)):
             detected += 1

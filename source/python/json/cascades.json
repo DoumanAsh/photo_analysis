@@ -70,7 +70,7 @@
   "upper_body_01":   {"use":           1,
                       "cascade_file":  "cascades/haarcascade_mcs_upperbody.xml",
                       "scale_factor":  1.1,
-                      "min_neighbors": 20,
+                      "min_neighbors": 22,
                       "flags":         0,
                       "min_x": 44, "min_y": 40,
                       "max_x": 0,  "max_y":  0,
