@@ -4,170 +4,142 @@
 using namespace std;
 using namespace cv;
 
-#ifdef _MSC_VER
-# if CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION == 4 && CV_SUBMINOR_VERSION == 10
-// OpenCV 2.4.10
-#  if defined(_DEBUG)
-#  pragma comment(lib, "opencv_core2410d.lib")
-#  pragma comment(lib, "opencv_highgui2410d.lib")
-#  pragma comment(lib, "opencv_imgproc2410d.lib")
-#  pragma comment(lib, "opencv_video2410d.lib")
-#  pragma comment(lib, "opencv_ml2410d.lib")
+#define TRACELN(text) std::cout << "face_detect: " << text << std::endl
+template<typename T>
+T stringTo(const string &text)
+{
+    std::istringstream ss(text);
+    ss.flags(std::ios_base::skipws);
+    T result;
+    ss >> result;
 
-#  pragma comment(lib, "opencv_calib3d2410d.lib")
-#  pragma comment(lib, "opencv_objdetect2410d.lib")
-#  pragma comment(lib, "opencv_features2d2410d.lib")
-#  pragma comment(lib, "opencv_contrib2410d.lib")
-#  pragma comment(lib, "opencv_ts2410d.lib")
-#  pragma comment(lib, "opencv_legacy2410d.lib")
-#  pragma comment(lib, "opencv_flann2410d.lib")
-#  pragma comment(lib, "opencv_gpu2410d.lib")
-# else
-#  pragma comment(lib, "opencv_core2410.lib")
-#  pragma comment(lib, "opencv_highgui2410.lib")
-#  pragma comment(lib, "opencv_imgproc2410.lib")
-#  pragma comment(lib, "opencv_video2410.lib")
-#  pragma comment(lib, "opencv_ml2410.lib")
+    if (ss.fail() && ss.bad()) throw std::invalid_argument(text.c_str());
 
-#  pragma comment(lib, "opencv_calib3d2410.lib")
-#  pragma comment(lib, "opencv_objdetect2410.lib")
-#  pragma comment(lib, "opencv_features2d2410.lib")
-#  pragma comment(lib, "opencv_contrib2410.lib")
-#  pragma comment(lib, "opencv_ts2410.lib")
-#  pragma comment(lib, "opencv_legacy2410.lib")
-#  pragma comment(lib, "opencv_flann2410.lib")
-#  pragma comment(lib, "opencv_gpu2410.lib")
-# endif //#  if defined(_DEBUG)
+    return result;
+}
 
-# endif //# if CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION == 4 && CV_SUBMINOR_VERSION == 10
-#endif //#ifdef _MSC_VER
+class ImgObj {
+    public:
+        String image_name, cascade_name;
+        double scale_factor;
+        int min_neighbors, flags, min_size_x, max_size_x, min_size_y, max_size_y;
 
-string window_name = "Capture - Face detection";
-RNG rng(12345);
+        template<class iterator_type>
+        inline ImgObj(iterator_type args_it) {
+            init(args_it);
+        }
 
+        template<class iterator_type>
+        void  init(iterator_type args_it) {
+            image_name     = *args_it++;
+            cascade_name   = *args_it++;
+            scale_factor   = stringTo<double>(*args_it++);
+            min_neighbors  = stringTo<int>(*args_it++);
+            flags          = stringTo<int>(*args_it++);
+            min_size_x     = stringTo<int>(*args_it++);
+            min_size_y     = stringTo<int>(*args_it++);
+            max_size_x     = stringTo<int>(*args_it++);
+            max_size_y     = stringTo<int>(*args_it);
+        }
+
+        inline string toString() {
+            const auto tab = "    ";
+            std::stringstream ss;
+            ss << "Image:" << endl
+               << tab << "name:          " << image_name << endl
+               << tab << "cascade name:  " << cascade_name << endl
+               << tab << "scale factor:  " << scale_factor << endl
+               << tab << "min_neighbors: " << min_neighbors << endl
+               << tab << "flags:         " << flags << endl
+               << tab << "min x:         " << min_size_x << endl
+               << tab << "min y:         " << min_size_y << endl
+               << tab << "max x:         " << max_size_x << endl
+               << tab << "max y:         " << max_size_y << endl;
+
+            return ss.str();
+        }
+};
+
+static inline void detectObjects(CascadeClassifier &cascade, const ImgObj &imgObj, vector<Rect> &objects, Mat &frame_gray) {
+    if (imgObj.min_size_x <= 0 || imgObj.min_size_y <= 0)
+        cascade.detectMultiScale(frame_gray, objects, imgObj.scale_factor, imgObj.min_neighbors, imgObj.flags);
+    else if (imgObj.max_size_x > 0 && imgObj.max_size_y > 0 && imgObj.max_size_x > imgObj.min_size_x && imgObj.max_size_y > imgObj.min_size_y)
+        cascade.detectMultiScale(frame_gray, objects, imgObj.scale_factor, imgObj.min_neighbors, imgObj.flags, Size(imgObj.min_size_x, imgObj.min_size_y), Size(imgObj.max_size_x, imgObj.max_size_y));
+    else
+        cascade.detectMultiScale(frame_gray, objects, imgObj.scale_factor, imgObj.min_neighbors, imgObj.flags, Size(imgObj.min_size_x, imgObj.min_size_y));
+}
 
 int main(int argc, char* argv[])
 {
-	/*cout << "Debug: ";
-	for (int i(0); i < argc; i++)
-	{
-		cout << " " << argv[i];
-	}
-	cout << endl;*/
+    if (argc < 8) {
+        TRACELN("insufficient number of arguments");
+        return -1;
+    }
 
-	if (argc < 8) return -1;
+    CascadeClassifier cascade;
+    Mat frame_gray;
+    std::vector<Rect> objects, objects2;
+    vector<string> args(argv + 1, argv + argc);
 
-	String image_name        = argv[1];
-	String cascade_name      = argv[2];
-	double scale_factor = atof(argv[3]);
-	int min_neighbors   = atoi(argv[4]);
-	int flags           = atoi(argv[5]);
-	int min_size_x      = atoi(argv[6]);
-	int min_size_y      = atoi(argv[7]);
-	int max_size_x      = atoi(argv[8]);
-	int max_size_y      = atoi(argv[9]);
+    auto imgObj = ImgObj(args.begin());
 
-	bool nested_object = (bool)atoi(argv[10]);
+#define LONG_EDGE 1000
+    int rows = LONG_EDGE, cols = LONG_EDGE;
+    Mat img = cv::imread(imgObj.image_name);
 
-	String cascade_name2;
-	double scale_factor2;
-	int min_neighbors2;
-	int flags2;
-	int min_size_x2;
-	int min_size_y2;
-	int max_size_x2;
-	int max_size_y2;
-	CascadeClassifier cascade2;
-	std::vector<Rect> objects2;
-	if (nested_object)
-	{
-		cascade_name2	 = argv[11];
-		scale_factor2	 = atof(argv[12]);
-		min_neighbors2   = atoi(argv[13]);
-		flags2           = atoi(argv[14]);
-		min_size_x2      = atoi(argv[15]);
-		min_size_y2      = atoi(argv[16]);
-		max_size_x2      = atoi(argv[17]);
-		max_size_y2      = atoi(argv[18]);
-	}
+    img.rows > img.cols ? cols = rows * img.cols / img.rows
+                        : rows = cols * img.rows / img.cols;
 
-	CascadeClassifier cascade;
+    cv::resize(img, img, Size(cols, rows));
+#undef LONG_EDGE
 
-	int rows;
-	int cols;
-	int long_edge = 1000;
-    Mat img = cv::imread(image_name);
+    if (!cascade.load(imgObj.cascade_name)) {
+        TRACELN("--(!)Error loading main image");
+        return -1;
+    }
 
-	if (img.rows > img.cols)
-	{
-		rows = long_edge;
-		cols = rows*img.cols/img.rows;
-	}
-	else
-	{
-		cols = long_edge;
-		rows = cols*img.rows/img.cols;
-	}
+    cvtColor(img, frame_gray, CV_BGR2GRAY);
+    equalizeHist(frame_gray, frame_gray);
 
-	cv::resize(img, img, Size(cols, rows));
+    detectObjects(cascade, imgObj, objects, frame_gray);
 
-	   //-- 1. Load the cascade
-	if( !cascade.load( cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
-	if (nested_object)
-	{
-		if( !cascade2.load( cascade_name2 ) ){ printf("--(!)Error loading\n"); return -1; };
-	}
-	std::vector<Rect> objects;
-	Mat frame_gray;
+    if (stringTo<bool>(args[9])) {
+        CascadeClassifier cascade2;
 
-	cvtColor(img, frame_gray, CV_BGR2GRAY);
-	equalizeHist(frame_gray, frame_gray);
+        if (!cascade2.load(imgObj.cascade_name)) {
+            TRACELN("--(!)Error loading nested image");
+            return -1;
+        }
 
-	//-- Detect objects
-	if (min_size_x <= 0 || min_size_y <= 0)
-		cascade.detectMultiScale(frame_gray, objects, scale_factor, min_neighbors, flags);
-	else if (max_size_x > 0 && max_size_y > 0 && max_size_x > min_size_x && max_size_y > min_size_y)
-		cascade.detectMultiScale(frame_gray, objects, scale_factor, min_neighbors, flags, Size(min_size_x, min_size_y), Size(max_size_x, max_size_y));
-	else
-		cascade.detectMultiScale(frame_gray, objects, scale_factor, min_neighbors, flags, Size(min_size_x, min_size_y));
+        imgObj.init(args.begin() + 11);
 
-	if (nested_object)
-	{
-		for( size_t i = 0; i < objects.size(); i++ )
-		{
-			Mat objectROI = frame_gray( objects[i] );
+        for (auto object : objects) {
+            Mat objectROI = frame_gray(object);
 
-			//-- In each object, detect nested object
-			if (min_size_x2 <= 0 || min_size_y2 <= 0)
-				cascade2.detectMultiScale(objectROI, objects2, scale_factor2, min_neighbors2, flags2);
-			else if (max_size_x2 > 0 && max_size_y2 > 0 && max_size_x2 > min_size_x2 && max_size_y2 > min_size_y2)
-				cascade2.detectMultiScale(objectROI, objects2, scale_factor2, min_neighbors2, flags2, Size(min_size_x2, min_size_y2), Size(max_size_x2, max_size_y2));
-			else
-				cascade2.detectMultiScale(objectROI, objects2, scale_factor2, min_neighbors2, flags2, Size(min_size_x2, min_size_y2));
+            detectObjects(cascade2, imgObj, objects2, objectROI);
+        }
+    }
 
-		}
-	}
-
-	cout << "Found " << objects.size() << " objects" << " and " << objects2.size() << " nested objects";
-	/*
-	for( size_t i = 0; i < objects.size(); i++ )
+    TRACELN("Found " << objects.size() << " objects" << " and " << objects2.size() << " nested objects");
+    /*
+    for( size_t i = 0; i < objects.size(); i++ )
     {
-		Point center(objects[i].x + objects[i].width/2, objects[i].y + objects[i].height/2);
-		ellipse(img, center, Size( objects[i].width/2, objects[i].height/2), 0, 0, 360, Scalar( 0, 255, 0 ), 2, 8, 0);
-		if (nested_object)
-		{
-			for( size_t j = 0; j < objects2.size(); j++ )
-			{
-				Point center(objects[i].x + objects2[j].x + objects2[i].width/2, objects[i].y + objects2[j].y + objects2[j].height/2);
-				ellipse(img, center, Size( objects2[j].width/2, objects2[j].height/2), 0, 0, 360, Scalar( 255, 0, 0 ), 2, 8, 0);
-			}
-		}
-	}
+        Point center(objects[i].x + objects[i].width/2, objects[i].y + objects[i].height/2);
+        ellipse(img, center, Size( objects[i].width/2, objects[i].height/2), 0, 0, 360, Scalar( 0, 255, 0 ), 2, 8, 0);
+        if (nested_object)
+        {
+            for( size_t j = 0; j < objects2.size(); j++ )
+            {
+                Point center(objects[i].x + objects2[j].x + objects2[i].width/2, objects[i].y + objects2[j].y + objects2[j].height/2);
+                ellipse(img, center, Size( objects2[j].width/2, objects2[j].height/2), 0, 0, 360, Scalar( 255, 0, 0 ), 2, 8, 0);
+            }
+        }
+    }
 
 
-	cv::imshow("img", img);
-    cv::waitKey(0);	*/
-	return 0;
+    cv::imshow("img", img);
+    cv::waitKey(0);    */
+    return 0;
 }
 
 

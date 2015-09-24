@@ -45,9 +45,9 @@ def get_keywords(image):
 
         trace.debug('Output: {0}'.format(out))
 
-        if int(out.split()[1]) > 0:
+        if int(out.split()[2]) > 0:
             keywords.extend(cascades[cascade]['keywords'])
-            if int(out.split()[4]) > 0:
+            if int(out.split()[5]) > 0:
                 keywords.extend(cascades[cascade]['nested_object']['keywords'])
 
     return list(set(keywords))
