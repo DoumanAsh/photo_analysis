@@ -20,7 +20,7 @@ canvas_bg = '#222222'
 # External binary tools
 exiftool = path.abspath('bin/exiftool.exe')
 iptc_address_tags = {"Country-PrimaryLocationName", "Province-State", "City", "Sub-location"}
-object_detector = path.abspath('bin/object_detection.exe')
+object_detector = path.abspath('bin/face_detect.exe')
 
 # Geocoders
 yandex_geocoder = 'http://geocode-maps.yandex.ru/1.x/'

@@ -4,7 +4,7 @@ from os import walk as os_walk
 from os import path as os_path
 from tkinter import *
 from tkinter import filedialog, messagebox
-from tkinter import ttk
+from tkinter import ttk, PhotoImage
 from PIL import Image, ImageTk
 # Internal modules
 from main_config import *
@@ -45,7 +45,7 @@ class CanvasWithImage(Canvas):
 
         self.width_img = pil_img.size[0]
         self.height_img = pil_img.size[1]
-        self.tk_img = ImageTk.PhotoImage(pil_img)
+        self.tk_img = ImageTk.PhotoImage(pil_img) #crashes here
 
     def config(self, image=None, side=None):
         if image:
@@ -77,7 +77,7 @@ class WinPhotoAn(Toplevel):
         for top, _, files in os_walk(path):
             for _f in files:
                 if os_path.splitext(_f)[1].lower() in supported_ext_for_analysis:
-                    self.photo_for_analysis.append(os_path.join(top, _f))
+                    self.photo_for_analysis.append(os_path.normcase(os_path.join(top, _f)))
 
         if not self.photo_for_analysis:  # If no photos found
             if project_keywords is not None:  # If photo analysis was requested from project
@@ -93,7 +93,7 @@ class WinPhotoAn(Toplevel):
                     for top, _, files in os_walk(new_path):
                         for _f in files:
                             if os_path.splitext(_f)[1].lower() in supported_ext_for_analysis:
-                                self.photo_for_analysis.append(os_path.join(top, _f))
+                                self.photo_for_analysis.append(os_path.normcase(os_path.join(top, _f)))
                     if self.photo_for_analysis:  # Break from the loop if now photos are found
                         break
                 else:  # Cancel
