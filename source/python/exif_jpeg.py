@@ -24,6 +24,9 @@ def get_exif_field(img_name, field):
     i = Image.open(img_name)
     info = i._getexif()
 
+    if not info:
+        return None
+
     for tag, value in info.items():
         decoded = TAGS.get(tag, tag)
         fields[decoded] = value
