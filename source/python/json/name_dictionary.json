@@ -27,8 +27,8 @@
   "win_about":           {"en": "About the program",          "ru": "О программе"},
   "win_help":            {"en": "A short how-to",             "ru": "Справка"},
   "text_about":          {
-    "en": "This program is a prototype of a system for automated management of photo-projects. It has been developed as a practice part of a graduation thesis for the degree of bachelor of business-informatics.\n\nNational Research University\nHigher School of Economics\nNizhniy Novgorod\n2015\n\nProject source code:\ngithub.com/AlexVeprev/Practice_Graduation_thesis_2015_HSE\n\nAuthor: Alexey Veprev\naveprev27@gmail.com",
-    "ru": "Эта программа является прототипом системы для автоматизированного управления фотопроектами. Разработана в качестве практической части выпускной квалификационной работы для получения степени бакалавра бизнес-информатики.\n\nНациональный Исследовательский Университет\nВысшая Школа Экономики\nНижний Новгород\n2015 год\n\nИсходный код проекта:\ngithub.com/AlexVeprev/Practice_Graduation_thesis_2015_HSE\n\nАвтор: Алексей Вепрев (БУВ БИ 12)\naveprev27@gmail.com"},
+    "en": "This program is a prototype of a system for automated management of photo-projects.",
+    "ru": "Эта программа является прототипом системы для автоматизированного управления фотопроектами."},
   "photo_projects":      {"en": "Photo-projects",             "ru": "Фотопроекты"},
   "frame_proj_info":     {"en": "Project info",               "ru": "Информация о проекте"},
   "name":                {"en": "Name",                       "ru": "Имя"},
