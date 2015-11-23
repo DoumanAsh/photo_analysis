@@ -2,17 +2,15 @@ from traceback import extract_stack
 from os import path
 
 # Initial values for trace filtering
-traces = dict(
-    error=True,
-    warning=True,
-    info=True,
-    debug=False,
-    enter=False)
+traces = {"error"   :True,
+          "warning" :True,
+          "info"    :True,
+          "debug"   :False,
+          "enter"   :False}
 
 
 def set_tracing(trace_name, value):
     traces[trace_name] = value
-
 
 def info(text):
     if not traces['info']:

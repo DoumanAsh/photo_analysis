@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # External modules
 from shutil import rmtree as delete_folder
 from tkinter import *

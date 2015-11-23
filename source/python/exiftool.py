@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import tracer as trace
 from main_config import exiftool
 from subprocess import Popen, PIPE

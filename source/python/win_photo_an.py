@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # External modules
 from os import walk as os_walk
 from os import path as os_path

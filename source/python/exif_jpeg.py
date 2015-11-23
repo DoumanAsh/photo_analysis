@@ -1,10 +1,8 @@
-﻿# -*- coding: utf-8 -*-
+﻿from PIL import Image
 import tracer as trace
+from PIL.ExifTags import TAGS
 
 def get_all_exif(img_name):
-    from PIL import Image
-    from PIL.ExifTags import TAGS
-
     fields = {}
     i = Image.open(img_name)
     info = i._getexif()
@@ -17,24 +15,16 @@ def get_all_exif(img_name):
 
 
 def get_exif_field(img_name, field):
-    from PIL import Image
-    from PIL.ExifTags import TAGS
-
-    fields = {}
     i = Image.open(img_name)
     info = i._getexif()
 
-    if not info:
-        return None
+    if info:
+        for tag, value in info.items():
+            decoded = TAGS.get(tag, tag)
+            if field == decoded:
+                return value
 
-    for tag, value in info.items():
-        decoded = TAGS.get(tag, tag)
-        fields[decoded] = value
-
-    if field in fields:
-        return fields[field]
-    else:
-        return None
+    return None
 
 
 @trace.enter

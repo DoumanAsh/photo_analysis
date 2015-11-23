@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from json import load as json_load
 from subprocess import Popen, PIPE
 import tracer as trace

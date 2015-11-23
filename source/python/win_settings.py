@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # External modules
 from json import dump as json_dump
 from tkinter import *

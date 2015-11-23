@@ -1,28 +1,20 @@
-﻿# -*- coding: utf-8 -*-
-import tracer as trace
+﻿import tracer as trace
+from main_config import osm_types_and_classes_json, yandex_geocoder
+import exif_jpeg as exif
+from requests import get as request_get
+from requests.exceptions import ConnectionError, HTTPError, Timeout, RequestException
+from json import loads as json_loads
+from json import load as json_load
 
-
-@trace.enter
-def convert_address_to_iptc_format(address):
-    d = dict(
-        # Yandex kinds
-        country="Country-PrimaryLocationName",
-        province="Province-State",
-        locality="City",
-        area="Sub-location",
-        district="Sub-location"
-    )
-
-    return d.get(address)
-
+# Yandex kinds
+convert_address_to_iptc_format = {"country"  : "Country-PrimaryLocationName",
+                                  "province" : "Province-State",
+                                  "locality" : "City",
+                                  "area"     : "Sub-location",
+                                  "district" : "Sub-location" }
 
 @trace.enter
 def get_info_yandex(latitude, longitude):
-    from requests import get as request_get
-    from requests.exceptions import ConnectionError, HTTPError, Timeout, RequestException
-    from json import loads as json_loads
-    from main_config import yandex_geocoder
-
     items = {}
     query = "{0}?format=json&geocode={1},{2}".format(yandex_geocoder, longitude, latitude)
 
@@ -55,14 +47,8 @@ def get_info_yandex(latitude, longitude):
 
     return items
 
-
 @trace.enter
 def get_info_osm(latitude, longitude):
-    from requests import get as request_get
-    from requests.exceptions import ConnectionError, HTTPError, Timeout, RequestException
-    from json import loads as json_loads
-    from main_config import osm_geocoder
-
     keywords = []
     query = "{0}?format=json&q={1},{2}".format(osm_geocoder, latitude, longitude)
 
@@ -93,8 +79,6 @@ def get_info_osm(latitude, longitude):
 
 @trace.enter
 def get_geo_tags_in_iptc_format(image):
-    import exif_jpeg as exif
-
     exif_gps = exif.get_exif_field(image, "GPSInfo")
     try:
         gps_info = exif.parse_gps_info(exif_gps, "dd") if exif_gps else None
@@ -112,7 +96,7 @@ def get_geo_tags_in_iptc_format(image):
     iptc_d = dict(keywords=[])
 
     for tag in y_d:
-        iptc_key = convert_address_to_iptc_format(tag)
+        iptc_key = convert_address_to_iptc_format[tag]
         if iptc_key:
             iptc_d[iptc_key] = y_d[tag]
         else:
@@ -123,9 +107,6 @@ def get_geo_tags_in_iptc_format(image):
 
 
 def get_osm_keywords(object_class, object_type):
-    from main_config import osm_types_and_classes_json
-    from json import load as json_load
-
     with open(osm_types_and_classes_json, encoding='utf-8') as fd:
         kw_dict = json_load(fd)
 

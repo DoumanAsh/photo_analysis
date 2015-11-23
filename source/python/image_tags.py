@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
 import geo_tags
 import people_detection
 import tracer as trace
+from main_config import exiftool
 from subprocess import Popen, PIPE
 
 @trace.enter
 def write_tags_to_image_via_et(image, tags):
-    from main_config import exiftool
 
     options = ['-codedcharacterset=UTF8',
                '-charset', 'iptc=cp1251',
