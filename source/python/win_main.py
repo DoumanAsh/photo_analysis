@@ -181,15 +181,8 @@ class WinMain():
                                       font=["Segoe Print", 16])
 
 
-        self.lbl_welcome2 = ttk.Label(master=self.frame_welcome,
-                                      text=get_name("welcome_text2"),
-                                      justify=CENTER,
-                                      padding=10,
-                                      font=["Segoe Print", 12])
-
         self.frame_welcome.pack(fill=BOTH)
         self.lbl_welcome1.grid(row=0, column=0)
-        self.lbl_welcome2.grid(row=1, column=0)
         self.frame_default_controls.grid(rowspan=2, row=0, column=1)
         self.btn_open_proj.pack(fill=X)
         self.btn_create_proj.pack(fill=X)

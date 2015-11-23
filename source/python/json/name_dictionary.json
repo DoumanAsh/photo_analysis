@@ -2,8 +2,6 @@
   "win_main":            {"en": "Photo-project manager",      "ru": "Менеджер фотопроектов"},
   "welcome_text1":       {"en": "Welcome to the\nPhoto-project manager!",
                           "ru": "Добро пожаловать в\nМенеджер фотопроектов!"},
-  "welcome_text2":       {"en": "Chaos in your photo-archive\nwill be defeated forever ;)",
-                          "ru": "Хаос в Вашем фотоархиве\nбудет навсегда побеждён ;)"},
   "menu_project":        {"en": "Projects",                             "ru": "Проекты"},
   "cmd_open_project":    {"en": "Open project...  (Ctrl+O)",            "ru": "Открыть проект...  (Ctrl+O)"},
   "cmd_close_project":   {"en": "Close project  (Ctrl+Q)",              "ru": "Закрыть проект  (Ctrl+Q)"},
