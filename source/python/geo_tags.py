@@ -1,17 +1,18 @@
-﻿import tracer as trace
-from main_config import osm_types_and_classes_json, yandex_geocoder
-import exif_jpeg as exif
-from requests import get as request_get
-from requests.exceptions import ConnectionError, HTTPError, Timeout, RequestException
+﻿from sys import argv
 from json import loads as json_loads
 from json import load as json_load
+import tracer as trace
+import exif_jpeg as exif
+from main_config import osm_types_and_classes_json, yandex_geocoder, osm_geocoder
+from requests import get as request_get
+from requests.exceptions import ConnectionError, HTTPError, Timeout, RequestException
 
 # Yandex kinds
-convert_address_to_iptc_format = {"country"  : "Country-PrimaryLocationName",
-                                  "province" : "Province-State",
-                                  "locality" : "City",
-                                  "area"     : "Sub-location",
-                                  "district" : "Sub-location" }
+ADDR_TO_IPTC_FORMAT = {"country"  : "Country-PrimaryLocationName",
+                       "province" : "Province-State",
+                       "locality" : "City",
+                       "area"     : "Sub-location",
+                       "district" : "Sub-location"}
 
 @trace.enter
 def get_info_yandex(latitude, longitude):
@@ -96,7 +97,7 @@ def get_geo_tags_in_iptc_format(image):
     iptc_d = dict(keywords=[])
 
     for tag in y_d:
-        iptc_key = convert_address_to_iptc_format[tag]
+        iptc_key = ADDR_TO_IPTC_FORMAT[tag]
         if iptc_key:
             iptc_d[iptc_key] = y_d[tag]
         else:
@@ -107,8 +108,8 @@ def get_geo_tags_in_iptc_format(image):
 
 
 def get_osm_keywords(object_class, object_type):
-    with open(osm_types_and_classes_json, encoding='utf-8') as fd:
-        kw_dict = json_load(fd)
+    with open(osm_types_and_classes_json, encoding='utf-8') as json_file:
+        kw_dict = json_load(json_file)
 
     keywords = []
     try:
@@ -119,11 +120,10 @@ def get_osm_keywords(object_class, object_type):
     return keywords
 
 if __name__ == "__main__":
-    from sys import argv
-    res = get_geo_tags_in_iptc_format(argv[1])
+    geo_tags = get_geo_tags_in_iptc_format(argv[1])
     print("Results:")
-    if res:
-        for item in res:
-            print("{0}: {1}".format(item, res[item]))
+    if geo_tags:
+        for item in geo_tags:
+            print("{0}: {1}".format(item, geo_tags[item]))
     else:
         print("geo-info not found")

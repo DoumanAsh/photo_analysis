@@ -1,5 +1,5 @@
-﻿from PIL import Image
-import tracer as trace
+﻿import tracer as trace
+from PIL import Image
 from PIL.ExifTags import TAGS
 
 def get_all_exif(img_name):

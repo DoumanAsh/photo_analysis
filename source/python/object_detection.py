@@ -1,9 +1,9 @@
+from sys import argv
 from json import load as json_load
-from subprocess import Popen, PIPE
-import tracer as trace
-from main_config import *
-
 import cv2
+import tracer as trace
+from main_config import cascades_json
+
 
 @trace.enter
 def cv2_get_objects(gray, cascade_file, scale_factor, min_neighbors, flags, min_x=0, min_y=0, max_x=0, max_y=0):
@@ -18,8 +18,8 @@ def cv2_get_objects(gray, cascade_file, scale_factor, min_neighbors, flags, min_
 
 @trace.enter
 def get_keywords(image):
-    with open(cascades_json, encoding='utf-8') as f:
-        cascades = json_load(f)
+    with open(cascades_json, encoding='utf-8') as json_file:
+        cascades = json_load(json_file)
 
     keywords = []
     for cascade in sorted(cascades):
@@ -44,7 +44,7 @@ def get_keywords(image):
         if faces.__len__():
             keywords.extend(cascades[cascade]['keywords'])
             if 'nested_object' in cascades[cascade]:
-                for (x1,y1,x2,y2) in faces:
+                for (x1, y1, x2, y2) in faces:
                     roi_gray = gray[y1:y1+y2, x1:x1+x2]
                     smiles = cv2_get_objects(roi_gray,
                                              cascades[cascade]['nested_object']['cascade_file'],
@@ -62,7 +62,6 @@ def get_keywords(image):
     return list(set(keywords))
 
 if __name__ == "__main__":
-    from sys import argv
     res = get_keywords(argv[1])
     if res:
         print("Keywords:", ", ".join(res))

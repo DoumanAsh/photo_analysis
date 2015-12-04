@@ -1,8 +1,7 @@
-import geo_tags
-import people_detection
+from subprocess import Popen, PIPE
+#import geo_tags
 import tracer as trace
 from main_config import exiftool
-from subprocess import Popen, PIPE
 
 @trace.enter
 def write_tags_to_image_via_et(image, tags):
@@ -35,21 +34,21 @@ def write_tags_to_image_via_et(image, tags):
     return proc.returncode
 
 
-@trace.enter
-def get_tags(image):
-    #get_geo_tags_in_et_format is missing geo_tags
-    tags = geo_tags.get_geo_tags_in_et_format(image)
-    if 'keywords' in tags:
-        tags['keywords'].extend(people_detection.get_keywords(image))
-    else:
-        tags['keywords'] = people_detection.get_keywords(image)
+#@trace.enter
+#def get_tags(image):
+#    #get_geo_tags_in_et_format is missing geo_tags
+#    tags = geo_tags.get_geo_tags_in_et_format(image)
+#    if 'keywords' in tags:
+#        tags['keywords'].extend(people_detection.get_keywords(image))
+#    else:
+#        tags['keywords'] = people_detection.get_keywords(image)
+#
+#    return tags
+#
+#path = "D:/_test/control_set_01"
+#import exiftool
+#
+#for image in os.listdir(path):
+#    get_tags(os.path.join(path, image))
 
-    return tags
 
-'''
-path = "D:/_test/control_set_01"
-import exiftool
-
-for image in os.listdir(path):
-    get_tags(os.path.join(path, image))
-'''
