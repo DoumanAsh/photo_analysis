@@ -45,6 +45,10 @@ def get_keywords(image):
             keywords.extend(cascades[cascade]['keywords'])
             if 'nested_object' in cascades[cascade]:
                 for (x1, y1, x2, y2) in faces:
+                    #show face
+                    #img = cv2.rectangle(img,(x1,y1),(x1+x2,y1+y2),(255,0,0),2)
+                    #roi_color = img[y1:y1+y2, x1:x1+x2]
+
                     roi_gray = gray[y1:y1+y2, x1:x1+x2]
                     smiles = cv2_get_objects(roi_gray,
                                              cascades[cascade]['nested_object']['cascade_file'],
@@ -57,7 +61,20 @@ def get_keywords(image):
                                              cascades[cascade]['nested_object']['max_y'])
 
                     if smiles.__len__():
+                        #show smile
+                        #for (ex,ey,ew,eh) in smiles:
+                        #    cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+
                         keywords.extend(cascades[cascade]['nested_object']['keywords'])
+
+            #resize
+            #height, width = img.shape[:2]
+            #img = cv2.resize(img, (int(height/1.5), int(width/1.2)))
+
+            #show image
+            #cv2.imshow('img',img)
+            #cv2.waitKey(0)
+            #cv2.destroyAllWindows()
 
     return list(set(keywords))
 
