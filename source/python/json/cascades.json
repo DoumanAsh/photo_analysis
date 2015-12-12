@@ -41,7 +41,7 @@
                                         "scale_factor":  1.1,
                                         "min_neighbors": 180,
                                         "flags":         0,
-                                        "min_x": 20, "min_y": 20,
+                                        "min_x": 40, "min_y": 40,
                                         "max_x": 0,  "max_y":  0,
                                         "keywords": ["улыбка"]}},
   "profile_face_02": {"use":           1,
