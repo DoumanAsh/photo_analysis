@@ -11,6 +11,8 @@ from requests.exceptions import ConnectionError, HTTPError, Timeout, RequestExce
 ADDR_TO_IPTC_FORMAT = {"country"  : "Country-PrimaryLocationName",
                        "province" : "Province-State",
                        "locality" : "City",
+                       "house"    : "House",
+                       "street"   : "Street",
                        "area"     : "Sub-location",
                        "district" : "Sub-location"}
 
